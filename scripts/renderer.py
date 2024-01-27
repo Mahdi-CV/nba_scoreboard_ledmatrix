@@ -77,8 +77,8 @@ class Render:
             graphics.DrawText(canvas, self.font_medium, text_start_x + (len(awayteam) * 8), 10, graphics.Color(100, 100, 100), str(awayscore))
 
             # Display home team name and score
-            graphics.DrawText(canvas, self.font_medium, text_start_x, 32, graphics.Color(self.team_colors[hometeam][1][0], self.team_colors[hometeam][1][1], self.team_colors[hometeam][1][2]), hometeam)
-            graphics.DrawText(canvas, self.font_medium, text_start_x + (len(hometeam) * 8), 32, graphics.Color(100, 100, 100), str(homescore))
+            graphics.DrawText(canvas, self.font_medium, text_start_x, 11, graphics.Color(self.team_colors[hometeam][1][0], self.team_colors[hometeam][1][1], self.team_colors[hometeam][1][2]), hometeam)
+            graphics.DrawText(canvas, self.font_medium, text_start_x + (len(hometeam) * 8), 11, graphics.Color(100, 100, 100), str(homescore))
 
             # Update the display
             canvas = matrix.SwapOnVSync(canvas)
