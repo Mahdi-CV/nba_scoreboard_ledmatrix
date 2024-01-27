@@ -41,8 +41,39 @@ class Render:
         self.font.LoadFont("./submodules/rpi-rgb-led-matrix/fonts/6x12.bdf")
         self.font2 = graphics.Font()
         self.font2.LoadFont("./submodules/rpi-rgb-led-matrix/fonts/4x6.bdf")
-        self.team_colors = {'ATL': [[225, 58, 62], [100, 100, 100]], 'BOS': [[0, 131, 72], [187, 151, 83]], 'BKN': [[100, 100, 100], [100, 100, 100]], 'CHA': [[29, 17, 96], [0, 140, 168]], 'CHI': [[206, 17, 65], [206, 17, 65]], 'CLE': [[134, 0, 56], [253, 187, 48]], 'DAL': [[0, 125, 197], [196, 206, 211]], 'DEN': [[77, 144, 205], [253, 185, 39]], 'DET': [[237, 23, 76], [0, 107, 182]], 'GSW': [[253, 185, 39], [0, 107, 182]], 'HOU': [[206, 17, 65], [206, 17, 65]], 'LAL': [[253, 185, 39], [85, 37, 130]], 'MEM': [[15, 88, 108], [190, 212, 233]], 'MIA': [[152, 0, 46], [152, 0, 46]], 'MIL': [[0, 71, 27], [240, 235, 210]], 'MIN': [[0, 80, 131], [0, 169, 79]], 'NOP': [[0, 43, 92], [227, 24, 55]], 'NYK': [[0, 107, 182], [245, 132, 38]], 'OKC': [[0, 125, 195], [240, 81, 51]], 'ORL': [[0, 71, 27], [0, 71, 27]], 'PHI': [[237, 23, 76], [0, 107, 182]], 'PHX': [[229, 96, 32], [29, 17, 96]], 'POR': [[224, 58, 62], [186, 195, 201]], 'SAC': [[114, 76, 159], [142, 144, 144]], 'SAS': [[0, 71, 27], [0, 71, 27]], 'TOR': [[255, 0, 0], [255, 0, 0]], 'UTA': [[0, 43, 92], [249, 160, 27]], 'WAS': [[0, 43, 92], [227, 24, 55]], 'IND': [[255, 198, 51], [0, 39, 93]], 'LAC': [[237, 23, 76], [0, 107, 182]]}
-            
+        self.team_colors = {
+            'ATL': [[225, 68, 52], [196, 214, 0]],  # Atlanta Hawks
+            'BOS': [[0, 122, 51], [139, 111, 78]],  # Boston Celtics
+            'BKN': [[33, 33, 33], [119, 125, 132]],     # Brooklyn Nets
+            'CHA': [[29, 17, 96], [0, 120, 140]],    # Charlotte Hornets
+            'CHI': [[206, 17, 65], [33, 33, 33]],     # Chicago Bulls
+            'CLE': [[134, 0, 56], [255, 184, 28]],   # Cleveland Cavaliers
+            'DAL': [[0, 83, 188], [0, 43, 92]],      # Dallas Mavericks
+            'DEN': [[13, 34, 64], [255, 198, 39]],   # Denver Nuggets
+            'DET': [[200, 16, 46], [29, 66, 138]],   # Detroit Pistons
+            'GSW': [[29, 66, 138], [255, 199, 44]],  # Golden State Warriors
+            'HOU': [[206, 17, 65], [33, 33, 33]],     # Houston Rockets
+            'IND': [[0, 45, 98], [253, 187, 48]],    # Indiana Pacers
+            'LAC': [[200, 16, 46], [29, 66, 138]],   # Los Angeles Clippers
+            'LAL': [[85, 37, 130], [253, 185, 39]],  # Los Angeles Lakers
+            'MEM': [[93, 118, 169], [18, 23, 63]],   # Memphis Grizzlies
+            'MIA': [[152, 0, 46], [249, 160, 27]],   # Miami Heat
+            'MIL': [[0, 71, 27], [240, 235, 210]],   # Milwaukee Bucks
+            'MIN': [[12, 35, 64], [35, 97, 146]],    # Minnesota Timberwolves
+            'NOP': [[0, 22, 65], [225, 58, 62]],     # New Orleans Pelicans
+            'NYK': [[0, 107, 182], [245, 132, 38]],  # New York Knicks
+            'OKC': [[0, 125, 195], [239, 59, 36]],   # Oklahoma City Thunder
+            'ORL': [[0, 125, 197], [196, 206, 211]], # Orlando Magic
+            'PHI': [[0, 107, 182], [237, 23, 76]],   # Philadelphia 76ers
+            'PHX': [[29, 17, 96], [229, 95, 32]],    # Phoenix Suns
+            'POR': [[224, 58, 62], [186, 195, 201]], # Portland Trail Blazers
+            'SAC': [[91, 43, 130], [99, 113, 122]],  # Sacramento Kings
+            'SAS': [[33, 33, 33], [196, 206, 211]],   # San Antonio Spurs
+            'TOR': [[206, 17, 65], [33, 33, 33]],     # Toronto Raptors
+            'UTA': [[0, 43, 92], [0, 71, 27]],       # Utah Jazz
+            'WAS': [[0, 43, 92], [227, 24, 55]],     # Washington Wizards
+        }
+        
     
     def Render_Games(self, printer=False):
         matrix = RGBMatrix(options=self.options)
@@ -119,11 +150,13 @@ class Render:
                 game_status_text = "Final"
 
             elif game_status == 1:  # Game is scheduled for later
-                # Format and display the scheduled start time
-                game_time_utc = game['gameTimeUTC']
-                start_time = parser.parse(game_time_utc)
-                local_time = start_time.astimezone(tz.tzlocal()).strftime("%H:%M")
-                game_status_text = f"Starts {local_time}"
+                # Calculate the time remaining until the game starts
+                current_time = datetime.now(tz.tzlocal())
+                game_time_utc = parser.parse(game['gameTimeUTC'])
+                time_difference = game_time_utc - current_time
+                hours, remainder = divmod(int(time_difference.total_seconds()), 3600)
+                minutes, _ = divmod(remainder, 60)
+                game_status_text = f"Starts in {hours}h {minutes}m" if time_difference.total_seconds() > 0 else "Starting Soon"
 
             # Example coordinates for displaying game status
             clock_x = 2
