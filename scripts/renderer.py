@@ -24,7 +24,7 @@ class Render:
         self.font_medium = graphics.Font()
         self.font_medium.LoadFont("./submodules/rpi-rgb-led-matrix/fonts/7x13.bdf")  
         self.font_small = graphics.Font()
-        self.font_small.LoadFont("./submodules/rpi-rgb-led-matrix/fonts/5x8.bdf") 
+        self.font_small.LoadFont("./submodules/rpi-rgb-led-matrix/fonts/4x6.bdf") 
         self.team_colors = {
             'ATL': [[225, 68, 52], [196, 214, 0]],  # Atlanta Hawks
             'BOS': [[0, 122, 51], [139, 111, 78]],  # Boston Celtics
@@ -133,21 +133,23 @@ class Render:
                 else:
                     game_clock_text = "Live"
                 # Render the quarter-by-quarter scores
+
                 quarter_text = f"Q{game['period']}" if game['period'] <= 4 else "OT"
                 game_clock_text = f"{minutes}:{seconds}"
 
+                # Since each character in 4x6 font typically occupies 4 pixels in width
+                char_width = 4
+
                 # Render the quarter and game clock text with reduced space
                 graphics.DrawText(canvas, self.font_small, clock_x, clock_y, graphics.Color(255, 255, 255), quarter_text)
-                graphics.DrawText(canvas, self.font_small, clock_x + (len(quarter_text) * 6) + 1, clock_y, graphics.Color(255, 255, 255), game_clock_text)
+                graphics.DrawText(canvas, self.font_small, clock_x + (len(quarter_text) * char_width) + 1, clock_y, graphics.Color(255, 255, 255), game_clock_text)
 
                 # Render the quarter-by-quarter scores
-                quarter_scores_start_x = clock_x + (len(quarter_text) * 6) + 1 + (len(game_clock_text) * 6) + 1
-                quarter_width = 6  # Reduced width for each quarter score
+                quarter_scores_start_x = clock_x + (len(quarter_text) * char_width) + 1 + (len(game_clock_text) * char_width) + 1
+                quarter_width = 4  # Adjusted for 4x6 font
 
                 for period in range(1, game['regulationPeriods'] + 1):
                     score_x = quarter_scores_start_x + (period - 1) * quarter_width
-
-
                     # Find and render the scores for each team in this quarter
                     away_score = next((p['score'] for p in game['awayTeam']['periods'] if p['period'] == period), 0)
                     home_score = next((p['score'] for p in game['homeTeam']['periods'] if p['period'] == period), 0)
