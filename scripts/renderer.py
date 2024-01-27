@@ -115,6 +115,10 @@ class Render:
             game_status = game['gameStatus']
             game_status_text = game['gameStatusText']
 
+            # Example coordinates for displaying game status
+            clock_x = 2
+            clock_y = 28
+
             if game_status == 2:  # Game is live
                 # Extract and format game clock (convert from ISO 8601 duration)
                 game_clock = game['gameClock']
@@ -157,10 +161,6 @@ class Render:
                 game_status_text = f"Starts in {hours}h {minutes}m" if time_difference.total_seconds() > 0 else "Starting Soon"
                 # Render the game status text
                 graphics.DrawText(canvas, self.font_small, clock_x, clock_y, graphics.Color(255, 255, 255), game_status_text)
-
-            # Example coordinates for displaying game status
-            clock_x = 2
-            clock_y = 28
             
             if game_status == 2:
                 # Render the quarter-by-quarter scores
