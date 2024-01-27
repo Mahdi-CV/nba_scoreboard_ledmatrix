@@ -37,7 +37,7 @@ class Render:
         self.font.LoadFont("./submodules/rpi-rgb-led-matrix/fonts/6x12.bdf")
         self.font2 = graphics.Font()
         self.font2.LoadFont("./submodules/rpi-rgb-led-matrix/fonts/4x6.bdf")
-        self.team_colors = {'ATL': [[225, 58, 62], [100, 100, 100]], 'BOS': [[0, 131, 72], [187, 151, 83]], 'BKN': [[100, 100, 100], [100, 100, 100]], 'CHA': [[29, 17, 96], [0, 140, 168]], 'CHI': [[206, 17, 65], [206, 17, 65]], 'CLE': [[134, 0, 56], [253, 187, 48]], 'DAL': [[0, 125, 197], [196, 206, 211]], 'DEN': [[77, 144, 205], [253, 185, 39]], 'DET': [[237, 23, 76], [0, 107, 182]], 'GSW': [[253, 185, 39], [0, 107, 182]], 'HOU': [[206, 17, 65], [196, 206, 211]], 'LAL': [[253, 185, 39], [85, 37, 130]], 'MEM': [[15, 88, 108], [190, 212, 233]], 'MIA': [[152, 0, 46], [152, 0, 46]], 'MIL': [[0, 71, 27], [240, 235, 210]], 'MIN': [[0, 80, 131], [0, 169, 79]], 'NOP': [[0, 43, 92], [227, 24, 55]], 'NYK': [[0, 107, 182], [245, 132, 38]], 'OKC': [[0, 125, 195], [240, 81, 51]], 'ORL': [[0, 71, 27], [0, 71, 27]], 'PHI': [[237, 23, 76], [0, 107, 182]], 'PHX': [[229, 96, 32], [29, 17, 96]], 'POR': [[224, 58, 62], [186, 195, 201]], 'SAC': [[114, 76, 159], [142, 144, 144]], 'SAS': [[0, 71, 27], [0, 71, 27]], 'TOR': [[255, 0, 0], [255, 0, 0]], 'UTA': [[0, 43, 92], [249, 160, 27]], 'WAS': [[0, 43, 92], [227, 24, 55]], 'IND': [[255, 198, 51], [0, 39, 93]], 'LAC': [[237, 23, 76], [0, 107, 182]]}
+        self.team_colors = {'ATL': [[225, 58, 62], [100, 100, 100]], 'BOS': [[0, 131, 72], [187, 151, 83]], 'BKN': [[100, 100, 100], [100, 100, 100]], 'CHA': [[29, 17, 96], [0, 140, 168]], 'CHI': [[206, 17, 65], [206, 17, 65]], 'CLE': [[134, 0, 56], [253, 187, 48]], 'DAL': [[0, 125, 197], [196, 206, 211]], 'DEN': [[77, 144, 205], [253, 185, 39]], 'DET': [[237, 23, 76], [0, 107, 182]], 'GSW': [[253, 185, 39], [0, 107, 182]], 'HOU': [[206, 17, 65], [206, 17, 65]], 'LAL': [[253, 185, 39], [85, 37, 130]], 'MEM': [[15, 88, 108], [190, 212, 233]], 'MIA': [[152, 0, 46], [152, 0, 46]], 'MIL': [[0, 71, 27], [240, 235, 210]], 'MIN': [[0, 80, 131], [0, 169, 79]], 'NOP': [[0, 43, 92], [227, 24, 55]], 'NYK': [[0, 107, 182], [245, 132, 38]], 'OKC': [[0, 125, 195], [240, 81, 51]], 'ORL': [[0, 71, 27], [0, 71, 27]], 'PHI': [[237, 23, 76], [0, 107, 182]], 'PHX': [[229, 96, 32], [29, 17, 96]], 'POR': [[224, 58, 62], [186, 195, 201]], 'SAC': [[114, 76, 159], [142, 144, 144]], 'SAS': [[0, 71, 27], [0, 71, 27]], 'TOR': [[255, 0, 0], [255, 0, 0]], 'UTA': [[0, 43, 92], [249, 160, 27]], 'WAS': [[0, 43, 92], [227, 24, 55]], 'IND': [[255, 198, 51], [0, 39, 93]], 'LAC': [[237, 23, 76], [0, 107, 182]]}
             
     
     def Render_Games(self, printer=False):
@@ -90,6 +90,44 @@ class Render:
             # Display home team name and score
             graphics.DrawText(canvas, self.font_medium, text_start_x, home_text_y, graphics.Color(self.team_colors[hometeam][1][0], self.team_colors[hometeam][1][1], self.team_colors[hometeam][1][2]), hometeam)
             graphics.DrawText(canvas, self.font_medium, text_start_x + (len(hometeam) * 8), home_text_y, graphics.Color(100, 100, 100), str(homescore))
+
+            game_status_text = game['gameStatusText']
+
+            if game['period'] <= 4:
+                    quarter_text = f"Q{game['period']}"  # Regular quarters
+            else:
+                    quarter_text = "OT"  # Overtime
+
+            # Extract and format game clock (convert from ISO 8601 duration)
+            game_clock = game['gameClock']
+            minutes, seconds = game_clock.lstrip('PT').split('M')
+            seconds = seconds.rstrip('S').split('.')[0]  # Removing '.00S'
+            game_clock_text = f"{minutes}:{seconds}"
+
+            # Combine quarter and game clock
+            game_status_text = f"{quarter_text} {game_clock_text}"
+
+            # Example coordinates
+            clock_x = 2  # Starting x position (adjust as needed)
+            clock_y = 28  # Starting y position at the bottom of the matrix (adjust as needed)
+
+            # Render the game clock and quarter
+            graphics.DrawText(canvas, self.font_small, clock_x, clock_y, graphics.Color(255, 255, 255), game_status_text)
+
+            # # Render the quarter-by-quarter scores
+            # score_x = quarter_x  # Starting x position for scores
+            # for period in range(1, game['regulationPeriods'] + 1):  # Loop through each quarter
+            #     # Find the score for the away team in this quarter
+            #     away_score = next((p['score'] for p in game['awayTeam']['periods'] if p['period'] == period), 0)
+            #     # Find the score for the home team in this quarter
+            #     home_score = next((p['score'] for p in game['homeTeam']['periods'] if p['period'] == period), 0)
+
+            #     # Format and render the score for this quarter
+            #     quarter_score_text = f"{away_score}-{home_score}"
+            #     graphics.DrawText(canvas, self.font_small, score_x, ..., graphics.Color(255, 255, 255), quarter_score_text)
+            #     score_x += ...  # Increment x position for the next quarter score
+
+
 
             # Update the display
             canvas = matrix.SwapOnVSync(canvas)
