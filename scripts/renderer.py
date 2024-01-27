@@ -55,41 +55,37 @@ class Render:
             canvas.Clear()
 
             logo_width, logo_height = 10, 10
+            gap = 1  # Gap between away and home team sections
+            # Away team logo and text
+            away_logo_y = 0  # Y position for away team logo
+            away_text_y = logo_height  # Y position for away team text
+
+            # Home team logo and text
+            home_logo_y = away_logo_y + logo_height + gap  # Y position for home team logo
+            home_text_y = home_logo_y + logo_height  # Y position for home team text
+
             away_logo_path = f'./assets/logos_16x16/{awayteam}.png'
             home_logo_path = f'./assets/logos_16x16/{hometeam}.png'
             if os.path.exists(away_logo_path) and os.path.exists(home_logo_path):
                 away_logo = Image.open(away_logo_path).convert('RGB').resize((logo_width, logo_height))
                 home_logo = Image.open(home_logo_path).convert('RGB').resize((logo_width, logo_height))
-                canvas.SetImage(away_logo, 0, 0)  # Position for away team logo
-                canvas.SetImage(home_logo, 0, 22)  # Position for home team logo
+                canvas.SetImage(away_logo, 0, away_logo_y)
+                canvas.SetImage(home_logo, 0, home_logo_y)
             else:
                 print(f"Logo not found for teams {awayteam} or {hometeam}")
 
-            # Adjusted positions for team names and scores
             text_start_x = logo_width + 2  # Small gap after logo
-
-            # Use a suitable font size
-            self.font_medium = graphics.Font()
-            self.font_medium.LoadFont("./submodules/rpi-rgb-led-matrix/fonts/7x13.bdf")
-
-            # Display away team name and score
-            graphics.DrawText(canvas, self.font_medium, text_start_x, 10, graphics.Color(self.team_colors[awayteam][1][0], self.team_colors[awayteam][1][1], self.team_colors[awayteam][1][2]), awayteam)
-            graphics.DrawText(canvas, self.font_medium, text_start_x + (len(awayteam) * 8), 10, graphics.Color(100, 100, 100), str(awayscore))
+            graphics.DrawText(canvas, self.font_medium, text_start_x, away_text_y, graphics.Color(self.team_colors[awayteam][1][0], self.team_colors[awayteam][1][1], self.team_colors[awayteam][1][2]), awayteam)
+            graphics.DrawText(canvas, self.font_medium, text_start_x + (len(awayteam) * 8), away_text_y, graphics.Color(100, 100, 100), str(awayscore))
 
             # Display home team name and score
-            graphics.DrawText(canvas, self.font_medium, text_start_x, 11, graphics.Color(self.team_colors[hometeam][1][0], self.team_colors[hometeam][1][1], self.team_colors[hometeam][1][2]), hometeam)
-            graphics.DrawText(canvas, self.font_medium, text_start_x + (len(hometeam) * 8), 11, graphics.Color(100, 100, 100), str(homescore))
+            graphics.DrawText(canvas, self.font_medium, text_start_x, home_text_y, graphics.Color(self.team_colors[hometeam][1][0], self.team_colors[hometeam][1][1], self.team_colors[hometeam][1][2]), hometeam)
+            graphics.DrawText(canvas, self.font_medium, text_start_x + (len(hometeam) * 8), home_text_y, graphics.Color(100, 100, 100), str(homescore))
 
             # Update the display
             canvas = matrix.SwapOnVSync(canvas)
             time.sleep(6)  # Adjust the timing as needed
     
-            
-        
 if __name__=='__main__':
     while True:
         Render().Render_Games()
-
-        
-
-
