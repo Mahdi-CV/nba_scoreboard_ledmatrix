@@ -141,7 +141,7 @@ class Render:
                 char_width = 5
 
                 # Render the quarter and game clock text with reduced space
-                graphics.DrawText(canvas, self.font2, clock_x, clock_y, graphics.Color(255, 255, 255), quarter_text)
+                graphics.DrawText(canvas, self.font_small, clock_x, clock_y, graphics.Color(255, 255, 255), quarter_text)
                 graphics.DrawText(canvas, self.font_small, clock_x + (len(quarter_text) * char_width), clock_y, graphics.Color(255, 255, 255), game_clock_text)
 
                 # Render the quarter-by-quarter scores
