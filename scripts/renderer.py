@@ -117,7 +117,7 @@ class Render:
 
             # Example coordinates for displaying game status
             clock_x = 2
-            clock_y = 26
+            clock_y = 30  
 
             if game_status == 2:
                 # Extract and format game clock (convert from ISO 8601 duration)
@@ -134,17 +134,19 @@ class Render:
                     game_clock_text = "Live"
                 # Render the quarter-by-quarter scores
                 quarter_text = f"Q{game['period']}" if game['period'] <= 4 else "OT"
-                game_clock_text = f" {game_clock_text}"  # Space added for separation
+                game_clock_text = f"{minutes}:{seconds}"
 
-                # Render the quarter and game clock text
-                graphics.DrawText(canvas, self.font_small, clock_x, clock_y, graphics.Color(255, 255, 255), quarter_text + game_clock_text)
+                # Render the quarter and game clock text with reduced space
+                graphics.DrawText(canvas, self.font_small, clock_x, clock_y, graphics.Color(255, 255, 255), quarter_text)
+                graphics.DrawText(canvas, self.font_small, clock_x + (len(quarter_text) * 6) + 1, clock_y, graphics.Color(255, 255, 255), game_clock_text)
 
                 # Render the quarter-by-quarter scores
-                quarter_scores_start_x = clock_x + (len(quarter_text + game_clock_text) * 6) + 2  # Adjusted to be to the right of the game clock
+                quarter_scores_start_x = clock_x + (len(quarter_text) * 6) + 1 + (len(game_clock_text) * 6) + 1
                 quarter_width = 6  # Reduced width for each quarter score
 
                 for period in range(1, game['regulationPeriods'] + 1):
                     score_x = quarter_scores_start_x + (period - 1) * quarter_width
+
 
                     # Find and render the scores for each team in this quarter
                     away_score = next((p['score'] for p in game['awayTeam']['periods'] if p['period'] == period), 0)
