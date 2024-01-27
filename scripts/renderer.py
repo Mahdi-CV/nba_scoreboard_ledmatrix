@@ -54,8 +54,8 @@ class Render:
             # Clear the canvas
             canvas.Clear()
 
-            away_logo_path = f'./logos/{awayteam}.png'
-            home_logo_path = f'./logos/{hometeam}.png'
+            away_logo_path = f'./assets/logos_16x16/{awayteam}.png'
+            home_logo_path = f'./assets/logos_16x16/{hometeam}.png'
             if os.path.exists(away_logo_path) and os.path.exists(home_logo_path):
                 away_logo = Image.open(away_logo_path).convert('RGB')
                 home_logo = Image.open(home_logo_path).convert('RGB')
@@ -66,10 +66,11 @@ class Render:
 
 
             # Adjusted text positions to accommodate logos
-            graphics.DrawText(canvas, self.font_large, 18, 16, graphics.Color(self.team_colors[awayteam][1][0], self.team_colors[awayteam][1][1], self.team_colors[awayteam][1][2]), awayteam)
-            graphics.DrawText(canvas, self.font_large, 18, 34, graphics.Color(self.team_colors[hometeam][1][0], self.team_colors[hometeam][1][1], self.team_colors[hometeam][1][2]), hometeam)
-            graphics.DrawText(canvas, self.font_large, 38, 16, graphics.Color(100, 100, 100), str(awayscore))
-            graphics.DrawText(canvas, self.font_large, 38, 34, graphics.Color(100, 100, 100), str(homescore))
+            logo_end_x = 18  # Assuming logo width + a small margin
+            graphics.DrawText(canvas, self.font_large, logo_end_x, 16, graphics.Color(self.team_colors[awayteam][1][0], self.team_colors[awayteam][1][1], self.team_colors[awayteam][1][2]), awayteam)
+            graphics.DrawText(canvas, self.font_large, logo_end_x, 34, graphics.Color(self.team_colors[hometeam][1][0], self.team_colors[hometeam][1][1], self.team_colors[hometeam][1][2]), hometeam)
+            graphics.DrawText(canvas, self.font_large, logo_end_x + 20, 16, graphics.Color(100, 100, 100), str(awayscore))  # Adjust the x position as needed
+            graphics.DrawText(canvas, self.font_large, logo_end_x + 20, 34, graphics.Color(100, 100, 100), str(homescore))  # Adjust the x position as needed
 
             # Update the display
             canvas = matrix.SwapOnVSync(canvas)
