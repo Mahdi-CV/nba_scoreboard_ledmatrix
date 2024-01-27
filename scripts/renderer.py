@@ -24,7 +24,7 @@ class Render:
         self.font_medium = graphics.Font()
         self.font_medium.LoadFont("./submodules/rpi-rgb-led-matrix/fonts/7x13.bdf")  
         self.font_small = graphics.Font()
-        self.font_small.LoadFont("./submodules/rpi-rgb-led-matrix/fonts/4x6.bdf") 
+        self.font_small.LoadFont("./submodules/rpi-rgb-led-matrix/fonts/5x7.bdf") 
         self.team_colors = {
             'ATL': [[225, 68, 52], [196, 214, 0]],  # Atlanta Hawks
             'BOS': [[0, 122, 51], [139, 111, 78]],  # Boston Celtics
@@ -138,7 +138,7 @@ class Render:
                 game_clock_text = f"{minutes}:{seconds}"
 
                 # Since each character in 4x6 font typically occupies 4 pixels in width
-                char_width = 4
+                char_width = 5
 
                 # Render the quarter and game clock text with reduced space
                 graphics.DrawText(canvas, self.font_small, clock_x, clock_y, graphics.Color(255, 255, 255), quarter_text)
@@ -146,7 +146,7 @@ class Render:
 
                 # Render the quarter-by-quarter scores
                 quarter_scores_start_x = clock_x + (len(quarter_text) * char_width) + 1 + (len(game_clock_text) * char_width) + 1
-                quarter_width = 4  # Adjusted for 4x6 font
+                quarter_width = 5  # Adjusted for 4x6 font
 
                 for period in range(1, game['regulationPeriods'] + 1):
                     score_x = quarter_scores_start_x + (period - 1) * quarter_width
