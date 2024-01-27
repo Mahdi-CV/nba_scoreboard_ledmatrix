@@ -56,7 +56,7 @@ class Render:
 
             # Load and draw team logos
             away_logo = Image.open(f'./assets/logos_16x16/{awayteam}.png')
-            home_logo = Image.open(f'./logos/{hometeam}.png')
+            home_logo = Image.open(f'./assets/logos_16x16/{hometeam}.png')
             canvas.SetImage(away_logo, 0, 0)  # Adjust x, y positions as needed
             canvas.SetImage(home_logo, 0, 18)  # Adjust x, y positions as needed
 
