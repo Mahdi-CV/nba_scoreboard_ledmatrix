@@ -154,8 +154,8 @@ class Render:
                     away_score = next((p['score'] for p in game['awayTeam']['periods'] if p['period'] == period), 0)
                     home_score = next((p['score'] for p in game['homeTeam']['periods'] if p['period'] == period), 0)
 
-                    graphics.DrawText(canvas, self.font2, score_x, 28, graphics.Color(255, 255, 255), str(away_score))
-                    graphics.DrawText(canvas, self.font2, score_x, 32, graphics.Color(255, 255, 255), str(home_score))
+                    graphics.DrawText(canvas, self.font2, score_x, 25, graphics.Color(0, 0, 255), str(away_score))
+                    graphics.DrawText(canvas, self.font2, score_x, 32, graphics.Color(0, 0, 255), str(home_score))
 
             elif game_status == 3:  # Game has finished
                 game_status_text = "Final"
