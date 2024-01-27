@@ -78,7 +78,8 @@ class Render:
             homescore = game['homeTeam']['score']
             awayscore = game['awayTeam']['score']
             game_status = game['gameStatus']
-            print(hometeam + " vs " + awayteam)
+            
+            print(hometeam + " vs " + awayteam + " " + str(game_id))
 
             # Clear the canvas
             canvas.Clear()
@@ -130,9 +131,21 @@ class Render:
 
                 quarter_text = f"Q{game['period']}" if game['period'] <= 4 else "OT"
                 game_status_text = f"{quarter_text} {game_clock_text}"
+                              # Adjust the spacing between quarter text and game clock text
+                spacing = 1  # Reduced spacing (adjust as needed)
+                quarter_text_width = len(quarter_text) * 6  # Estimate width of quarter text (adjust based on font size)
+                game_clock_text_x = clock_x + quarter_text_width + spacing
+
+                game_status_text = f"{quarter_text} {game_clock_text}"
+
+                # Render the quarter and game clock text separately for better control over spacing
+                graphics.DrawText(canvas, self.font_small, clock_x, clock_y, graphics.Color(255, 255, 255), quarter_text)
+                graphics.DrawText(canvas, self.font_small, game_clock_text_x, clock_y, graphics.Color(255, 255, 255), game_clock_text)
 
             elif game_status == 3:  # Game has finished
                 game_status_text = "Final"
+                # Render the game status text
+                graphics.DrawText(canvas, self.font_small, clock_x, clock_y, graphics.Color(255, 255, 255), game_status_text)
 
             elif game_status == 1:  # Game is scheduled for later
                 # Calculate the time remaining until the game starts
@@ -142,29 +155,28 @@ class Render:
                 hours, remainder = divmod(int(time_difference.total_seconds()), 3600)
                 minutes, _ = divmod(remainder, 60)
                 game_status_text = f"Starts in {hours}h {minutes}m" if time_difference.total_seconds() > 0 else "Starting Soon"
+                # Render the game status text
+                graphics.DrawText(canvas, self.font_small, clock_x, clock_y, graphics.Color(255, 255, 255), game_status_text)
 
             # Example coordinates for displaying game status
             clock_x = 2
             clock_y = 28
+            
+            if game_status == 2:
+                # Render the quarter-by-quarter scores
+                quarter_scores_start_x = 32  # Start from the right half of the screen
+                quarter_width = 8  # Width allocated for each quarter score
+                
+                for period in range(1, game['regulationPeriods'] + 1):
+                    score_x = quarter_scores_start_x + (period - 1) * quarter_width
 
-            # Render the game status text
-            graphics.DrawText(canvas, self.font_small, clock_x, clock_y, graphics.Color(255, 255, 255), game_status_text)
+                    # Find and render the scores for each team in this quarter
+                    away_score = next((p['score'] for p in game['awayTeam']['periods'] if p['period'] == period), 0)
+                    home_score = next((p['score'] for p in game['homeTeam']['periods'] if p['period'] == period), 0)
 
-            # # Render the quarter-by-quarter scores
-            # score_x = quarter_x  # Starting x position for scores
-            # for period in range(1, game['regulationPeriods'] + 1):  # Loop through each quarter
-            #     # Find the score for the away team in this quarter
-            #     away_score = next((p['score'] for p in game['awayTeam']['periods'] if p['period'] == period), 0)
-            #     # Find the score for the home team in this quarter
-            #     home_score = next((p['score'] for p in game['homeTeam']['periods'] if p['period'] == period), 0)
-
-            #     # Format and render the score for this quarter
-            #     quarter_score_text = f"{away_score}-{home_score}"
-            #     graphics.DrawText(canvas, self.font_small, score_x, ..., graphics.Color(255, 255, 255), quarter_score_text)
-            #     score_x += ...  # Increment x position for the next quarter score
-
-
-
+                    graphics.DrawText(canvas, self.font_small, score_x, 20, graphics.Color(255, 255, 255), str(away_score))
+                    graphics.DrawText(canvas, self.font_small, score_x, 28, graphics.Color(255, 255, 255), str(home_score))
+  
             # Update the display
             canvas = matrix.SwapOnVSync(canvas)
             time.sleep(6)  # Adjust the timing as needed
