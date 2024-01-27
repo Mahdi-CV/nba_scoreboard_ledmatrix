@@ -44,6 +44,7 @@ class Render:
             homescore = game['homeTeam']['score']
             awayscore = game['awayTeam']['score']
             game_status = game['gameStatus']
+            print(hometeam + " vs " + awayteam)
 
             # Clear the canvas
             canvas.Clear()
