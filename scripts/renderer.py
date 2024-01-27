@@ -1,14 +1,8 @@
 from rgbmatrix import graphics, RGBMatrix, RGBMatrixOptions
+import time 
 import os
-import json
-import datetime as dt
-import time
-import sys
-# from NBA_Standings import NBA_Standings
-from dateutil import tz
-###
-from datetime import datetime, timezone
-from dateutil import parser
+from datetime import datetime
+from dateutil import parser, tz
 from nba_api.live.nba.endpoints import scoreboard
 from PIL import Image
 
@@ -20,27 +14,17 @@ class Render:
         self.options.rows = 32
         self.options.cols = 64
         self.options.drop_privileges = False
+        self.skip_count = {}  # Dictionary to keep track of skip counts for each game
 
         # Initialize and load fonts
         self.font = graphics.Font()
         self.font.LoadFont("./submodules/rpi-rgb-led-matrix/fonts/6x12.bdf")
         self.font2 = graphics.Font()
         self.font2.LoadFont("./submodules/rpi-rgb-led-matrix/fonts/4x6.bdf")
-
-        # Initialize and load medium font
         self.font_medium = graphics.Font()
         self.font_medium.LoadFont("./submodules/rpi-rgb-led-matrix/fonts/7x13.bdf")  
-
-        # Initialize and load small font
         self.font_small = graphics.Font()
         self.font_small.LoadFont("./submodules/rpi-rgb-led-matrix/fonts/5x8.bdf") 
-        
-        self.path = './nba_scoreboard_ledmatrix'
-        
-        self.font = graphics.Font()
-        self.font.LoadFont("./submodules/rpi-rgb-led-matrix/fonts/6x12.bdf")
-        self.font2 = graphics.Font()
-        self.font2.LoadFont("./submodules/rpi-rgb-led-matrix/fonts/4x6.bdf")
         self.team_colors = {
             'ATL': [[225, 68, 52], [196, 214, 0]],  # Atlanta Hawks
             'BOS': [[0, 122, 51], [139, 111, 78]],  # Boston Celtics
@@ -73,21 +57,22 @@ class Render:
             'UTA': [[0, 43, 92], [0, 71, 27]],       # Utah Jazz
             'WAS': [[0, 43, 92], [227, 24, 55]],     # Washington Wizards
         }
-        
-    
+
     def Render_Games(self, printer=False):
         matrix = RGBMatrix(options=self.options)
         canvas = matrix.CreateFrameCanvas()
-
-        # Load a larger font for team names
-        self.font_large = graphics.Font()
-        self.font_large.LoadFont("./submodules/rpi-rgb-led-matrix/fonts/10x20.bdf")
-
-        # Assuming 'games' is the JSON string you got from the NBA API
         board = scoreboard.ScoreBoard()
         print("ScoreBoardDate: " + board.score_board_date)
         games_data = board.games.get_dict()
+
         for game in games_data:
+            game_id = game['gameId']
+            if game['gameStatus'] != 2:  # If the game is not live
+                self.skip_count[game_id] = self.skip_count.get(game_id, 0) + 1
+                if self.skip_count[game_id] < 10:
+                    continue
+                else:
+                    self.skip_count[game_id] = 0
             hometeam = game['homeTeam']['teamTricode']
             awayteam = game['awayTeam']['teamTricode']
             homescore = game['homeTeam']['score']
