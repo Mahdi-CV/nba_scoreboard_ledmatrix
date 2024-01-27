@@ -20,7 +20,16 @@ class Render:
         self.options.rows = 32
         self.options.cols = 64
         self.options.drop_privileges = False
-        
+
+        # Initialize and load fonts
+        self.font = graphics.Font()
+        self.font.LoadFont("./submodules/rpi-rgb-led-matrix/fonts/6x12.bdf")
+        self.font2 = graphics.Font()
+        self.font2.LoadFont("./submodules/rpi-rgb-led-matrix/fonts/4x6.bdf")
+
+        # Initialize and load medium font
+        self.font_medium = graphics.Font()
+        self.font_medium.LoadFont("./submodules/rpi-rgb-led-matrix/fonts/7x13.bdf")  
         
         self.path = './nba_scoreboard_ledmatrix'
         
