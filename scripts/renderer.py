@@ -95,27 +95,41 @@ class Render:
             graphics.DrawText(canvas, self.font_medium, text_start_x, home_text_y, graphics.Color(self.team_colors[hometeam][1][0], self.team_colors[hometeam][1][1], self.team_colors[hometeam][1][2]), hometeam)
             graphics.DrawText(canvas, self.font_medium, text_start_x + (len(hometeam) * 8), home_text_y, graphics.Color(100, 100, 100), str(homescore))
 
+            game_status = game['gameStatus']
             game_status_text = game['gameStatusText']
 
-            if game['period'] <= 4:
-                    quarter_text = f"Q{game['period']}"  # Regular quarters
-            else:
-                    quarter_text = "OT"  # Overtime
+            if game_status == 2:  # Game is live
+                # Extract and format game clock (convert from ISO 8601 duration)
+                game_clock = game['gameClock']
+                if game_clock:  # Check if game clock is not empty
+                    try:
+                        minutes, seconds = game_clock.lstrip('PT').split('M')
+                        seconds = seconds.rstrip('S').split('.')[0]  # Removing '.00S'
+                        game_clock_text = f"{minutes}:{seconds}"
+                    except ValueError:
+                        # Handle cases where game clock format is unexpected
+                        game_clock_text = "Live"
+                else:
+                    game_clock_text = "Live"
 
-            # Extract and format game clock (convert from ISO 8601 duration)
-            game_clock = game['gameClock']
-            minutes, seconds = game_clock.lstrip('PT').split('M')
-            seconds = seconds.rstrip('S').split('.')[0]  # Removing '.00S'
-            game_clock_text = f"{minutes}:{seconds}"
+                quarter_text = f"Q{game['period']}" if game['period'] <= 4 else "OT"
+                game_status_text = f"{quarter_text} {game_clock_text}"
 
-            # Combine quarter and game clock
-            game_status_text = f"{quarter_text} {game_clock_text}"
+            elif game_status == 3:  # Game has finished
+                game_status_text = "Final"
 
-            # Example coordinates
-            clock_x = 2  # Starting x position (adjust as needed)
-            clock_y = 28  # Starting y position at the bottom of the matrix (adjust as needed)
+            elif game_status == 1:  # Game is scheduled for later
+                # Format and display the scheduled start time
+                game_time_utc = game['gameTimeUTC']
+                start_time = parser.parse(game_time_utc)
+                local_time = start_time.astimezone(tz.tzlocal()).strftime("%H:%M")
+                game_status_text = f"Starts {local_time}"
 
-            # Render the game clock and quarter
+            # Example coordinates for displaying game status
+            clock_x = 2
+            clock_y = 28
+
+            # Render the game status text
             graphics.DrawText(canvas, self.font_small, clock_x, clock_y, graphics.Color(255, 255, 255), game_status_text)
 
             # # Render the quarter-by-quarter scores
