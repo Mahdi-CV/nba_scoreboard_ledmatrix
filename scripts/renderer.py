@@ -116,7 +116,7 @@ class Render:
             game_status_text = game['gameStatusText']
 
             # Example coordinates for displaying game status
-            clock_x = 2
+            clock_x = 0
             clock_y = 30  
 
             if game_status == 2:
@@ -142,7 +142,7 @@ class Render:
 
                 # Render the quarter and game clock text with reduced space
                 graphics.DrawText(canvas, self.font_small, clock_x, clock_y, graphics.Color(255, 255, 255), quarter_text)
-                graphics.DrawText(canvas, self.font_small, clock_x + (len(quarter_text) * char_width) + 1, clock_y, graphics.Color(255, 255, 255), game_clock_text)
+                graphics.DrawText(canvas, self.font_small, clock_x + (len(quarter_text) * char_width), clock_y, graphics.Color(255, 255, 255), game_clock_text)
 
                 # Render the quarter-by-quarter scores
                 quarter_scores_start_x = clock_x + (len(quarter_text) * char_width) + 1 + (len(game_clock_text) * char_width) + 1
@@ -154,8 +154,8 @@ class Render:
                     away_score = next((p['score'] for p in game['awayTeam']['periods'] if p['period'] == period), 0)
                     home_score = next((p['score'] for p in game['homeTeam']['periods'] if p['period'] == period), 0)
 
-                    graphics.DrawText(canvas, self.font_small, score_x, 20, graphics.Color(255, 255, 255), str(away_score))
-                    graphics.DrawText(canvas, self.font_small, score_x, 28, graphics.Color(255, 255, 255), str(home_score))
+                    graphics.DrawText(canvas, self.font2, score_x, 32, graphics.Color(255, 255, 255), str(away_score))
+                    graphics.DrawText(canvas, self.font2, score_x, 42, graphics.Color(255, 255, 255), str(home_score))
 
             elif game_status == 3:  # Game has finished
                 game_status_text = "Final"
