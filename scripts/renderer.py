@@ -30,6 +30,10 @@ class Render:
         # Initialize and load medium font
         self.font_medium = graphics.Font()
         self.font_medium.LoadFont("./submodules/rpi-rgb-led-matrix/fonts/7x13.bdf")  
+
+        # Initialize and load small font
+        self.font_small = graphics.Font()
+        self.font_small.LoadFont("./path/to/your/small/font.bdf") 
         
         self.path = './nba_scoreboard_ledmatrix'
         
