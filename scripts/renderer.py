@@ -10,6 +10,7 @@ from dateutil import tz
 from datetime import datetime, timezone
 from dateutil import parser
 from nba_api.live.nba.endpoints import scoreboard
+from PIL import Image
 
 class Render:
     def __init__(self):
@@ -34,6 +35,10 @@ class Render:
         matrix = RGBMatrix(options=self.options)
         canvas = matrix.CreateFrameCanvas()
 
+        # Load a larger font for team names
+        self.font_large = graphics.Font()
+        self.font_large.LoadFont("./submodules/rpi-rgb-led-matrix/fonts/10x20.bdf")
+
         # Assuming 'games' is the JSON string you got from the NBA API
         board = scoreboard.ScoreBoard()
         print("ScoreBoardDate: " + board.score_board_date)
@@ -49,11 +54,17 @@ class Render:
             # Clear the canvas
             canvas.Clear()
 
-            # Rendering team names and scores, modify as needed for your display
-            graphics.DrawText(canvas, self.font, 1, 8, graphics.Color(self.team_colors[awayteam][1][0], self.team_colors[awayteam][1][1], self.team_colors[awayteam][1][2]), awayteam)
-            graphics.DrawText(canvas, self.font, 1, 18, graphics.Color(self.team_colors[hometeam][1][0], self.team_colors[hometeam][1][1], self.team_colors[hometeam][1][2]), hometeam)
-            graphics.DrawText(canvas, self.font, 21, 8, graphics.Color(100, 100, 100), str(awayscore))
-            graphics.DrawText(canvas, self.font, 21, 18, graphics.Color(100, 100, 100), str(homescore))
+            # Load and draw team logos
+            away_logo = Image.open(f'./assets/logos_16x16/{awayteam}.png')
+            home_logo = Image.open(f'./logos/{hometeam}.png')
+            canvas.SetImage(away_logo, 0, 0)  # Adjust x, y positions as needed
+            canvas.SetImage(home_logo, 0, 18)  # Adjust x, y positions as needed
+
+            # Adjusted text positions to accommodate logos
+            graphics.DrawText(canvas, self.font_large, 18, 16, graphics.Color(self.team_colors[awayteam][1][0], self.team_colors[awayteam][1][1], self.team_colors[awayteam][1][2]), awayteam)
+            graphics.DrawText(canvas, self.font_large, 18, 34, graphics.Color(self.team_colors[hometeam][1][0], self.team_colors[hometeam][1][1], self.team_colors[hometeam][1][2]), hometeam)
+            graphics.DrawText(canvas, self.font_large, 38, 16, graphics.Color(100, 100, 100), str(awayscore))
+            graphics.DrawText(canvas, self.font_large, 38, 34, graphics.Color(100, 100, 100), str(homescore))
 
             # Update the display
             canvas = matrix.SwapOnVSync(canvas)
