@@ -54,11 +54,16 @@ class Render:
             # Clear the canvas
             canvas.Clear()
 
-            # Load and draw team logos
-            away_logo = Image.open(f'./assets/logos_16x16/{awayteam}.png')
-            home_logo = Image.open(f'./assets/logos_16x16/{hometeam}.png')
-            canvas.SetImage(away_logo, 0, 0)  # Adjust x, y positions as needed
-            canvas.SetImage(home_logo, 0, 18)  # Adjust x, y positions as needed
+            away_logo_path = f'./logos/{awayteam}.png'
+            home_logo_path = f'./logos/{hometeam}.png'
+            if os.path.exists(away_logo_path) and os.path.exists(home_logo_path):
+                away_logo = Image.open(away_logo_path).convert('RGB')
+                home_logo = Image.open(home_logo_path).convert('RGB')
+                canvas.SetImage(away_logo, 0, 0)  # Adjust x, y positions as needed
+                canvas.SetImage(home_logo, 0, 18)  # Adjust x, y positions as needed
+            else:
+                print(f"Logo not found for teams {awayteam} or {hometeam}")
+
 
             # Adjusted text positions to accommodate logos
             graphics.DrawText(canvas, self.font_large, 18, 16, graphics.Color(self.team_colors[awayteam][1][0], self.team_colors[awayteam][1][1], self.team_colors[awayteam][1][2]), awayteam)
