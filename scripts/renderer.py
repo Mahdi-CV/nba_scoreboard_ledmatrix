@@ -106,11 +106,11 @@ class Render:
 
             text_start_x = logo_width + 2  # Small gap after logo
             graphics.DrawText(canvas, self.font_medium, text_start_x, away_text_y, graphics.Color(self.team_colors[awayteam][1][0], self.team_colors[awayteam][1][1], self.team_colors[awayteam][1][2]), awayteam)
-            graphics.DrawText(canvas, self.font_medium, text_start_x + (len(awayteam) * 8), away_text_y, graphics.Color(100, 100, 100), str(awayscore))
+            graphics.DrawText(canvas, self.font_medium, text_start_x + (len(awayteam) * 8), away_text_y, graphics.Color(255, 255, 255), str(awayscore))
 
             # Display home team name and score
             graphics.DrawText(canvas, self.font_medium, text_start_x, home_text_y, graphics.Color(self.team_colors[hometeam][1][0], self.team_colors[hometeam][1][1], self.team_colors[hometeam][1][2]), hometeam)
-            graphics.DrawText(canvas, self.font_medium, text_start_x + (len(hometeam) * 8), home_text_y, graphics.Color(100, 100, 100), str(homescore))
+            graphics.DrawText(canvas, self.font_medium, text_start_x + (len(hometeam) * 8), home_text_y, graphics.Color(255, 255, 255), str(homescore))
 
             game_status = game['gameStatus']
             game_status_text = game['gameStatusText']
@@ -145,17 +145,19 @@ class Render:
                 graphics.DrawText(canvas, self.font_small, clock_x + (len(quarter_text) * char_width), clock_y, graphics.Color(255, 255, 255), game_clock_text)
 
                 # Render the quarter-by-quarter scores
-                quarter_scores_start_x = clock_x + (len(quarter_text) * char_width) + 1 + (len(game_clock_text) * char_width) + 1
-                quarter_width = 5  # Adjusted for 4x6 font
+                quarter_scores_start_x = clock_x + (len(quarter_text) * char_width) + (len(game_clock_text) * char_width) + 2
+                # Distribute the scores evenly across the available width
+                quarter_width = 9  # Adjust this based on the available space
 
                 for period in range(1, game['regulationPeriods'] + 1):
                     score_x = quarter_scores_start_x + (period - 1) * quarter_width
+
                     # Find and render the scores for each team in this quarter
                     away_score = next((p['score'] for p in game['awayTeam']['periods'] if p['period'] == period), 0)
                     home_score = next((p['score'] for p in game['homeTeam']['periods'] if p['period'] == period), 0)
 
-                    graphics.DrawText(canvas, self.font2, score_x, 26, graphics.Color(0, 0, 255), str(away_score))
-                    graphics.DrawText(canvas, self.font2, score_x, 32, graphics.Color(0, 0, 255), str(home_score))
+                    graphics.DrawText(canvas, self.font2, score_x, 26, graphics.Color(100, 100, 100), str(away_score))
+                    graphics.DrawText(canvas, self.font2, score_x, 32, graphics.Color(100, 100, 100), str(home_score))
 
             elif game_status == 3:  # Game has finished
                 game_status_text = "Final"
