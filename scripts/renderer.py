@@ -121,7 +121,7 @@ class Render:
             game_status_text = game['gameStatusText']
 
             # Example coordinates for displaying game status
-            clock_x = 0
+            clock_x = 5
             clock_y = 30  
 
             if game_status == 2:
