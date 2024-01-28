@@ -65,6 +65,11 @@ class Render:
         print("ScoreBoardDate: " + board.score_board_date)
         games_data = board.games.get_dict()
 
+        scroll_position = 0  # Position for scrolling text
+        scroll_step = 1      # Amount to scroll each frame
+        scroll_interval = 0.1  # Time between scroll steps in seconds
+
+
         for game in games_data:
             game_id = game['gameId']
             if game['gameStatus'] != 2:  # If the game is not live
@@ -141,25 +146,30 @@ class Render:
                 char_width = 5
 
                 # Render the quarter and game clock text with reduced space
-                graphics.DrawText(canvas, self.font_small, clock_x, clock_y, graphics.Color(255, 255, 255), quarter_text)
-                graphics.DrawText(canvas, self.font_small, clock_x + (len(quarter_text) * char_width), clock_y, graphics.Color(255, 255, 255), game_clock_text)
+                graphics.DrawText(canvas, self.font_small, clock_x - scroll_position, clock_y, graphics.Color(255, 255, 255), quarter_text)
+                graphics.DrawText(canvas, self.font_small, clock_x - scroll_position + (len(quarter_text) * char_width), clock_y, graphics.Color(255, 255, 255), game_clock_text)
+
+                # Update scroll position
+                scroll_position += scroll_step
+                if scroll_position > matrix.width:  # Once scrolled off, reset position and show quarterly scores
+                    scroll_position = 0
 
                 quarter_scores_start_x = clock_x + (len(quarter_text) * char_width) + (len(game_clock_text) * char_width) + 2
                 quarter_width = 9  # Adjust this based on the available space and font size
 
-                for period in range(1, game['regulationPeriods'] + 1):
-                    score_x = quarter_scores_start_x + (period - 1) * quarter_width
+                # for period in range(1, game['regulationPeriods'] + 1):
+                #     score_x = quarter_scores_start_x + (period - 1) * quarter_width
 
-                    # Find and render the scores for each team in this quarter
-                    away_score = next((p['score'] for p in game['awayTeam']['periods'] if p['period'] == period), 0)
-                    home_score = next((p['score'] for p in game['homeTeam']['periods'] if p['period'] == period), 0)
+                #     # Find and render the scores for each team in this quarter
+                #     away_score = next((p['score'] for p in game['awayTeam']['periods'] if p['period'] == period), 0)
+                #     home_score = next((p['score'] for p in game['homeTeam']['periods'] if p['period'] == period), 0)
 
-                    # Format and render scores with fixed width
-                    formatted_away_score = f"{away_score:2d}"  # Formats score with 2-digit width, right-aligned
-                    formatted_home_score = f"{home_score:2d}"
+                #     # Format and render scores with fixed width
+                #     formatted_away_score = f"{away_score:2d}"  # Formats score with 2-digit width, right-aligned
+                #     formatted_home_score = f"{home_score:2d}"
 
-                    graphics.DrawText(canvas, self.font2, score_x, 26, graphics.Color(100, 100, 255), formatted_away_score)
-                    graphics.DrawText(canvas, self.font2, score_x, 32, graphics.Color(100, 100, 255), formatted_home_score)
+                #     graphics.DrawText(canvas, self.font2, score_x, 26, graphics.Color(100, 100, 255), formatted_away_score)
+                #     graphics.DrawText(canvas, self.font2, score_x, 32, graphics.Color(100, 100, 255), formatted_home_score)
 
             elif game_status == 3:  # Game has finished
                 game_status_text = "Final"
