@@ -428,7 +428,7 @@ class Render:
         canvas = matrix.CreateFrameCanvas()
         display_counter = 0  # Counter to switch between scores, probabilities, and quarterly scores
 
-        logo_height, logo_width = 12, 16  # Set your logo dimensions
+        logo_height, logo_width = 13, 17  # Set your logo dimensions
         clock_x = 5  # Position for the game clock
         clock_y = 30  # Position for the game clock
 
