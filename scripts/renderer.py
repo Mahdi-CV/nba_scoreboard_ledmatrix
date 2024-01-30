@@ -289,7 +289,7 @@ class Render:
         gap = 6 # Gap between top of screen and text
 
         # Assuming logos are at the top of the screen, start text right below the logos
-        away_name_y = self.font_medium_height + 1  # Y position for away team name
+        away_name_y = self.font_medium_height + 2  # Y position for away team name
         home_name_y = away_name_y + logo_height   # Y position for home team name, below the away name
 
         text_start_x = logo_height + gap  # X position for text, assuming logos are square
@@ -303,7 +303,7 @@ class Render:
         gap = 6  # Gap between text elements
 
         # Calculate Y positions based on logo height, slightly below the names
-        away_score_y = self.font_medium_height + 1  # Y position for away team score
+        away_score_y = self.font_medium_height + 2  # Y position for away team score
         home_score_y = away_score_y + logo_height # Y position for home team score
 
         # Calculate X positions for scores based on the length of team names
