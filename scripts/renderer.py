@@ -196,7 +196,8 @@ class Render:
         self.options.cols = 64
         self.options.drop_privileges = False
         self.skip_count = {}  # Dictionary to keep track of skip counts for each game
-
+        self.logo_height = 13
+        self.logo_width =  17
         # Initialize and load fonts
         self.font = graphics.Font()
         self.font.LoadFont("./submodules/rpi-rgb-led-matrix/fonts/6x12.bdf")
@@ -243,21 +244,21 @@ class Render:
             'WAS': [[0, 43, 92], [227, 24, 55]],     # Washington Wizards
         }
 
-    def render_team_logos(self, canvas, awayteam, hometeam, logo_height, logo_width):
+    def render_team_logos(self, canvas, awayteam, hometeam):
         gap = 1  # Gap between away and home team sections
         # Away team logo and text
         away_logo_y = 0  # Y position for away team logo
-        away_text_y = logo_height  # Y position for away team text
+        away_text_y = self.logo_height  # Y position for away team text
 
         # Home team logo and text
-        home_logo_y = away_logo_y + logo_height # Y position for home team logo
-        home_text_y = home_logo_y + logo_height  # Y position for home team text
+        home_logo_y = away_logo_y + self.logo_height # Y position for home team logo
+        home_text_y = home_logo_y + self.logo_height  # Y position for home team text
 
         away_logo_path = f'./assets/logos_16x16/{awayteam}.png'
         home_logo_path = f'./assets/logos_16x16/{hometeam}.png'
         if os.path.exists(away_logo_path) and os.path.exists(home_logo_path):
-            away_logo = Image.open(away_logo_path).convert('RGB').resize((logo_width, logo_height))
-            home_logo = Image.open(home_logo_path).convert('RGB').resize((logo_width, logo_height))
+            away_logo = Image.open(away_logo_path).convert('RGB').resize((self.logo_width, self.logo_height))
+            home_logo = Image.open(home_logo_path).convert('RGB').resize((self.logo_width, self.logo_height))
             canvas.SetImage(away_logo, 0, away_logo_y)
             canvas.SetImage(home_logo, 0, home_logo_y)
         else:
@@ -285,30 +286,28 @@ class Render:
 
     #     return
 
-    def render_team_names(self, canvas, awayteam, hometeam, logo_height, logo_width):
+    def render_team_names(self, canvas, awayteam, hometeam):
         gap = 6 # Gap between top of screen and text
 
         # Assuming logos are at the top of the screen, start text right below the logos
         away_name_y = self.font_medium_height + 2  # Y position for away team name
-        home_name_y = away_name_y + logo_height   # Y position for home team name, below the away name
+        home_name_y = away_name_y + self.logo_height   # Y position for home team name, below the away name
 
-        text_start_x = logo_height + gap  # X position for text, assuming logos are square
+        text_start_x = self.logo_height + gap  # X position for text, assuming logos are square
 
         # Render team names
         graphics.DrawText(canvas, self.font_medium, text_start_x, away_name_y, graphics.Color(self.team_colors[awayteam][1][0], self.team_colors[awayteam][1][1], self.team_colors[awayteam][1][2]), awayteam)
         graphics.DrawText(canvas, self.font_medium, text_start_x, home_name_y, graphics.Color(self.team_colors[hometeam][1][0], self.team_colors[hometeam][1][1], self.team_colors[hometeam][1][2]), hometeam)
         
-    def render_team_scores(self, canvas, awayteam, hometeam, awayscore, homescore, logo_height, logo_width):
-
+    def render_team_scores(self, canvas, awayteam, hometeam, awayscore, homescore):
         gap = 6  # Gap between text elements
-
         # Calculate Y positions based on logo height, slightly below the names
         away_score_y = self.font_medium_height + 2  # Y position for away team score
-        home_score_y = away_score_y + logo_height # Y position for home team score
+        home_score_y = away_score_y + self.logo_height # Y position for home team score
 
         # Calculate X positions for scores based on the length of team names
-        away_score_x = logo_width + (len(awayteam) * self.font_medium_width) + gap
-        home_score_x = logo_width + (len(hometeam) * self.font_medium_width) + gap
+        away_score_x = self.logo_width + (len(awayteam) * self.font_medium_width) + gap
+        home_score_x = self.logo_width + (len(hometeam) * self.font_medium_width) + gap
 
         # Render away team score
         graphics.DrawText(canvas, self.font_medium, away_score_x, away_score_y, graphics.Color(255, 255, 255), str(awayscore))
@@ -343,32 +342,36 @@ class Render:
 
 
 
-    def render_win_probabilities(self, canvas, awayteam, hometeam, away_prob, home_prob, logo_height, logo_width):
-        char_width = 6  # Use the widest character for width estimation
-        char_height = 10
-        gap = 1
-        text_start_x = logo_width + (len(awayteam) * char_width) + gap
-        away_text_y = char_height
-        home_text_y = away_text_y + logo_height + gap   # considering gap
+    def render_win_probabilities(self, canvas, awayteam, hometeam, away_prob, home_prob):
+
+        gap = 6  # Gap between text elements
+        # Calculate Y positions based on logo height, slightly below the names
+        away_score_y = self.font_medium_height + 2  # Y position for away team score
+        home_score_y = away_score_y + self.logo_height # Y position for home team score
+
+        # Calculate X positions for scores based on the length of team names
+        text_start_x = self.logo_width + (len(awayteam) * self.font_medium_width) + gap
+        home_text_y = self.logo_width + (len(hometeam) * self.font_medium_width) + gap
+
 
         # Format probabilities as percentages
         away_prob_text = f"{away_prob * 100:.0f}%"
         home_prob_text = f"{home_prob * 100:.0f}%"
 
         # Draw probabilities
-        graphics.DrawText(canvas, self.font_medium, text_start_x, away_text_y, graphics.Color(255, 255, 255), away_prob_text)
-        graphics.DrawText(canvas, self.font_medium, text_start_x, home_text_y, graphics.Color(255, 255, 255), home_prob_text)
+        graphics.DrawText(canvas, self.font_medium, text_start_x, away_score_y, graphics.Color(255, 255, 255), away_prob_text)
+        graphics.DrawText(canvas, self.font_medium, text_start_x, home_score_y, graphics.Color(255, 255, 255), home_prob_text)
 
 
-    def render_quarterly_scores(self, canvas, game, logo_height, logo_width):
+    def render_quarterly_scores(self, canvas, game):
         # Example of how you might want to structure this method
         # You need to fetch the quarterly scores from the game data
         char_width_team_name = 6  # Use the widest character for width estimation
         char_height = 5
         gap = 1
-        text_start_x = logo_width + (3 * char_width_team_name) + gap
+        text_start_x = self.logo_width + (3 * char_width_team_name) + gap
         away_text_y = 0
-        home_text_y = away_text_y + logo_height + 1  # considering gap
+        home_text_y = away_text_y + self.logo_height + 1  # considering gap
 
         # Assuming game['quarters'] contains the quarter scores
         for idx, quarter in enumerate(game['team_information']['away']['quarters']):
@@ -378,7 +381,7 @@ class Render:
 
         graphics.DrawText(canvas, self.font_small, text_start_x, away_text_y + idx * 8, graphics.Color(255, 255, 255), quarter_text)
 
-    def render_game_status(self, canvas, game_status, game, logo_height, logo_width):
+    def render_game_status(self, canvas, game_status, game):
         # Adjust the vertical position
         gap = 1
         status_text_y = self.options.rows - gap  # Place it near the top but leaving some margin
@@ -388,18 +391,40 @@ class Render:
         graphics.DrawText(canvas, self.font_small, status_text_x, status_text_y, graphics.Color(255, 255, 255), status_text)
 
 
-    def render_spread(self, canvas, game, logo_height, logo_width):
-        spread_text_y = logo_height * 2 + 2  # Adjust as needed
+    def render_spread(self, canvas, game):
+        spread_text_y = self.logo_height * 2 + 2  # Adjust as needed
         odds = game['odds']
         print(odds)
         if odds == None:
-            spread_text = f"Spread: {0}"
+            spread_text = f"N/A"
+            ou_text = f"N/A"
+
         else:
-            spread_text = f"Spread: {odds['spread']}"  # Example, adjust based on your data structure
+            spread_text = f"-{abs(odds['spread'])}"  # Example, adjust based on your data structure
+            ou_text = f"{odds['over_under']}" 
 
-        graphics.DrawText(canvas, self.font_small, logo_width + 2, spread_text_y, graphics.Color(255, 255, 255), spread_text)
+        #graphics.DrawText(canvas, self.font_small, self.logo_width + 2, spread_text_y, graphics.Color(255, 255, 255), spread_text)
+
+        gap = 1  # Gap between text elements
+        # Calculate Y positions based on logo height, slightly below the names
+        away_score_y = self.font_small_height + 4  # Y position for away team score
+        home_score_y = away_score_y + self.logo_height # Y position for home team score
+
+        # Calculate X positions for scores based on the length of team names
+        # away_score_x = self.logo_width + (3 * self.font_small_width) + gap
+        # home_score_x = self.logo_width + (3 * self.font_small_width) + gap
+        away_score_x = self.options.cols - len(spread_text) * self.font_small_width - gap
+        home_score_x = self.options.cols - len(spread_text) * self.font_small_width - gap
+        
 
 
+        if (odds['away_team_favorite']):
+            graphics.DrawText(canvas, self.font_small, away_score_x, away_score_y, graphics.Color(255, 255, 255), str(spread_text))
+            graphics.DrawText(canvas, self.font_small, home_score_x, home_score_y, graphics.Color(255, 255, 255), str(ou_text))
+        else:
+            graphics.DrawText(canvas, self.font_small, away_score_x, away_score_y, graphics.Color(255, 255, 255), str(ou_text)) 
+            graphics.DrawText(canvas, self.font_small, home_score_x, home_score_y, graphics.Color(255, 255, 255), str(spread_text))
+        
     def render_game_clock(self, canvas, game, clock_x, clock_y):
         game_status = game['game_information']['gameStatus']
         game_clock = game['game_information']['gameClock']
@@ -428,7 +453,7 @@ class Render:
         canvas = matrix.CreateFrameCanvas()
         display_counter = 0  # Counter to switch between scores, probabilities, and quarterly scores
 
-        logo_height, logo_width = 13, 17  # Set your logo dimensions
+          # Set your logo dimensions
         clock_x = 5  # Position for the game clock
         clock_y = 30  # Position for the game clock
 
@@ -442,31 +467,29 @@ class Render:
             awayscore = game['team_information']['away']['score']
             homescore = game['team_information']['home']['score']
 
-            self.render_team_logos(canvas, awayteam, hometeam, logo_height, logo_width)
+            self.render_team_logos(canvas, awayteam, hometeam)
 
             # Alternating between scores, probabilities, and quarterly scores
             if game_status == 2:  # Live games
-                if display_counter < 4:
-                    self.render_team_names(canvas, awayteam, hometeam,  logo_height, logo_width)
-                    self.render_team_scores(canvas, awayteam, hometeam, awayscore, homescore, logo_height, logo_width)
-                elif display_counter < 8:
+                #time.sleep(4)
+                self.render_team_names(canvas, awayteam, hometeam)
+                self.render_team_scores(canvas, awayteam, hometeam, awayscore, homescore)
+                #time.sleep(4)
                     # Example probabilities, replace with real values
-                    away_prob, home_prob = 0.5, 0.5  # Fetch win probabilities here
-                    self.render_win_probabilities(canvas, awayteam, hometeam, away_prob, home_prob, logo_height, logo_width)
-                else:
-                    self.render_quarterly_scores(canvas, game, logo_height, logo_width)
-                if display_counter >= 12:
-                    display_counter = 0
+                #away_prob, home_prob = 0.5, 0.5  # Fetch win probabilities here
+                #self.render_win_probabilities(canvas, awayteam, hometeam, away_prob, home_prob)
+                #self.render_quarterly_scores(canvas, game)
+                #time.sleep(4)
             elif game_status == 1:  # Scheduled games
-                self.render_team_names(canvas, awayteam, hometeam,  logo_height, logo_width)
-                # self.render_spread(canvas, game, logo_height, logo_width)
+                self.render_team_names(canvas, awayteam, hometeam)
+                self.render_spread(canvas, game)
             else:  # Post game or other statuses
-                self.render_team_names(canvas, awayteam, hometeam,  logo_height, logo_width)
-                self.render_team_scores(canvas, awayscore, homescore, logo_height, logo_width)
+                self.render_team_names(canvas, awayteam, hometeam)
+                self.render_team_scores(canvas, awayteam, hometeam, awayscore, homescore)
 
             # Render the game clock and game status
             #self.render_game_clock(canvas, game, clock_x, clock_y)
-            self.render_game_status(canvas, game_status, game, logo_height, logo_width)
+            self.render_game_status(canvas, game_status, game)
 
             # Update the display and counter
             canvas = matrix.SwapOnVSync(canvas)

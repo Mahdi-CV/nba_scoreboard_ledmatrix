@@ -27,7 +27,6 @@ def convert_game_time_to_local(game_time_str):
 
         # Parse the datetime string
         game_datetime = datetime.strptime(datetime_str, '%Y-%m-%d %I:%M %p')
-
         # Set the timezone to Eastern Time
         eastern = pytz.timezone('US/Eastern')
         game_datetime = eastern.localize(game_datetime)
