@@ -1,6 +1,8 @@
 from rgbmatrix import graphics, RGBMatrix, RGBMatrixOptions
-from data_manager import DataManager
+
 #from RGBMatrixEmulator import graphics, RGBMatrix, RGBMatrixOptions
+
+from data_manager import DataManager
 import time 
 import os
 from datetime import datetime
@@ -405,23 +407,19 @@ class Render:
 
         #graphics.DrawText(canvas, self.font_small, self.logo_width + 2, spread_text_y, graphics.Color(255, 255, 255), spread_text)
 
-        gap = 1  # Gap between text elements
+        gap = 0 # Gap between text elements
         # Calculate Y positions based on logo height, slightly below the names
         away_score_y = self.font_small_height + 4  # Y position for away team score
         home_score_y = away_score_y + self.logo_height # Y position for home team score
 
-        # Calculate X positions for scores based on the length of team names
-        # away_score_x = self.logo_width + (3 * self.font_small_width) + gap
-        # home_score_x = self.logo_width + (3 * self.font_small_width) + gap
-        away_score_x = self.options.cols - len(spread_text) * self.font_small_width - gap
-        home_score_x = self.options.cols - len(spread_text) * self.font_small_width - gap
-        
-
-
         if (odds['away_team_favorite']):
+            away_score_x = self.options.cols - len(spread_text) * self.font_small_width - gap
+            home_score_x = self.options.cols - len(ou_text) * self.font_small_width - gap
             graphics.DrawText(canvas, self.font_small, away_score_x, away_score_y, graphics.Color(255, 255, 255), str(spread_text))
             graphics.DrawText(canvas, self.font_small, home_score_x, home_score_y, graphics.Color(255, 255, 255), str(ou_text))
         else:
+            away_score_x = self.options.cols - len(ou_text) * self.font_small_width - gap
+            home_score_x = self.options.cols - len(spread_text) * self.font_small_width - gap
             graphics.DrawText(canvas, self.font_small, away_score_x, away_score_y, graphics.Color(255, 255, 255), str(ou_text)) 
             graphics.DrawText(canvas, self.font_small, home_score_x, home_score_y, graphics.Color(255, 255, 255), str(spread_text))
         
