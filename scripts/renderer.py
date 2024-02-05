@@ -1,6 +1,6 @@
-from rgbmatrix import graphics, RGBMatrix, RGBMatrixOptions
+#from rgbmatrix import graphics, RGBMatrix, RGBMatrixOptions
 
-#from RGBMatrixEmulator import graphics, RGBMatrix, RGBMatrixOptions
+from RGBMatrixEmulator import graphics, RGBMatrix, RGBMatrixOptions
 
 from data_manager import DataManager
 import time 
@@ -460,6 +460,13 @@ class Render:
             print('/n/n')
             # Extract game details
             game_status = game['game_information']['gameStatus']
+            if game_status != 2:
+                if game['game_information']['skip_count'] < 20:
+                    game['game_information']['skip_count'] += 1
+                    continue
+                else:
+                    game['skip_count'] = 0
+                    
             awayteam = game['team_information']['away']['teamTricode']
             hometeam = game['team_information']['home']['teamTricode']
             awayscore = game['team_information']['away']['score']
@@ -490,9 +497,8 @@ class Render:
             self.render_game_status(canvas, game_status, game)
 
             # Update the display and counter
-            canvas = matrix.SwapOnVSync(canvas)
-            display_counter += 1
-            time.sleep(4)  # Adjust as needed
+            canvas = matrix.SwapOnVSync(canvas)        
+            time.sleep(6)  # Adjust as needed
             canvas.Clear()
 
 

@@ -109,7 +109,8 @@ class DataManager:
             'gameClock': game.get('gameClock', ''),
             'period': game.get('period', ''),
             'gameTimeUTC': game['gameTimeUTC'],
-            'regulationPeriods': game.get('regulationPeriods', 4)
+            'regulationPeriods': game.get('regulationPeriods', 4),
+            'skip_count' : 0
         }
 
         # Team information
