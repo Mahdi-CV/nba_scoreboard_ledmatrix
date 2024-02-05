@@ -1,6 +1,6 @@
-from rgbmatrix import graphics, RGBMatrix, RGBMatrixOptions
+#from rgbmatrix import graphics, RGBMatrix, RGBMatrixOptions
 
-#from RGBMatrixEmulator import graphics, RGBMatrix, RGBMatrixOptions
+from RGBMatrixEmulator import graphics, RGBMatrix, RGBMatrixOptions
 
 from data_manager import DataManager
 import time 
@@ -197,7 +197,8 @@ class Render:
         self.options.rows = 32
         self.options.cols = 64
         self.options.drop_privileges = False
-        self.skip_count = {}  # Dictionary to keep track of skip counts for each game
+        self.last_game_day = None
+        self.skip_counts = {}
         self.logo_height = 13
         self.logo_width =  17
         # Initialize and load fonts
@@ -449,23 +450,34 @@ class Render:
     def Render_Games(self, games_data, printer=False):
         matrix = RGBMatrix(options=self.options)
         canvas = matrix.CreateFrameCanvas()
-        display_counter = 0  # Counter to switch between scores, probabilities, and quarterly scores
-
-          # Set your logo dimensions
-        clock_x = 5  # Position for the game clock
-        clock_y = 30  # Position for the game clock
+        
+        if games_data:
+            # Assuming all games in games_data are for the same day, use the first game to check the date
+            current_game_day = datetime.strptime(games_data[0]['game_information']['gameTimeUTC'], '%Y-%m-%dT%H:%M:%SZ').date()
+            print("current date: " + str(current_game_day))
+            print("skip_count length: " +str(len(self.skip_counts)))
+            if self.last_game_day is None or current_game_day > self.last_game_day:
+                # It's a new game day, reset skip counts and update last_game_day
+                self.skip_counts.clear()
+                self.last_game_day = current_game_day
 
         for game in games_data:
-            print(game)
-            print('/n/n')
-            # Extract game details
+            game_id = game['game_information']['gameId']
             game_status = game['game_information']['gameStatus']
+
+            # Check if the game is not live
             if game_status != 2:
-                if game['game_information']['skip_count'] < 20:
-                    game['game_information']['skip_count'] += 1
+                if self.skip_counts.get(game_id, 0) < 20:
+                    # Increment the skip count and continue to the next game
+                    self.skip_counts[game_id] = self.skip_counts.get(game_id, 0) + 1
                     continue
                 else:
-                    game['skip_count'] = 0
+                    # Reset the skip count for this game as it's being shown again
+                    self.skip_counts[game_id] = 0
+            else:
+                # Always reset the skip count for live games so they're always shown
+                self.skip_counts[game_id] = 0
+
                     
             awayteam = game['team_information']['away']['teamTricode']
             hometeam = game['team_information']['home']['teamTricode']

@@ -41,6 +41,44 @@ def convert_game_time_to_local(game_time_str):
         # If no timezone is included, or for live game status, return the original string
         return game_time_str
 
+def normalize_team_abbreviation(team_code):
+    # Dictionary to map NBA API team codes to corrected ESPN team abbreviations
+    abbreviation_mapping = {
+        "ATL": "ATL",  # Atlanta Hawks
+        "BOS": "BOS",  # Boston Celtics
+        "BKN": "BKN",  # Brooklyn Nets
+        "CHA": "CHA",  # Charlotte Hornets
+        "CHI": "CHI",  # Chicago Bulls
+        "CLE": "CLE",  # Cleveland Cavaliers
+        "DAL": "DAL",  # Dallas Mavericks
+        "DEN": "DEN",  # Denver Nuggets
+        "DET": "DET",  # Detroit Pistons
+        "GSW": "GS",  # Golden State Warriors, Note: Reverse mapping for consistency
+        "HOU": "HOU",  # Houston Rockets
+        "IND": "IND",  # Indiana Pacers
+        "LAC": "LAC",  # LA Clippers
+        "LAL": "LAL",  # Los Angeles Lakers
+        "MEM": "MEM",  # Memphis Grizzlies
+        "MIA": "MIA",  # Miami Heat
+        "MIL": "MIL",  # Milwaukee Bucks
+        "MIN": "MIN",  # Minnesota Timberwolves
+        "NOP": "NO",  # New Orleans Pelicans, Note: Reverse mapping for consistency
+        "NYK": "NY",  # New York Knicks
+        "OKC": "OKC",  # Oklahoma City Thunder
+        "ORL": "ORL",  # Orlando Magic
+        "PHI": "PHI",  # Philadelphia 76ers
+        "PHX": "PHX",  # Phoenix Suns
+        "POR": "POR",  # Portland Trail Blazers
+        "SAC": "SAC",  # Sacramento Kings
+        "SAS": "SA",  # San Antonio Spurs, Note: Reverse mapping for consistency
+        "TOR": "TOR",  # Toronto Raptors
+        "UTA": "UTAH",  # Utah Jazz, Note: Reverse mapping for consistency with NBA API
+        "WAS": "WSH",  # Corrected mapping for Washington Wizards
+    }
+
+    # Return the corrected ESPN abbreviation if it exists in the mapping, else return the original code
+    return abbreviation_mapping.get(team_code, team_code)
+
 
 
 
@@ -69,7 +107,9 @@ class DataManager:
         espn_events_by_gamecode = {event['shortName']: event for event in espn_data['events']}
 
         for game in nba_live_data:
-            game_code = f"{game['awayTeam']['teamTricode']} @ {game['homeTeam']['teamTricode']}"
+            away_team_code = normalize_team_abbreviation(game['awayTeam']['teamTricode'])
+            home_team_code = normalize_team_abbreviation(game['homeTeam']['teamTricode'])
+            game_code = f"{away_team_code} @ {home_team_code}"
 
             # Extract the gameTime from nba_live_data and convert it to a datetime object
             game_time_nba = datetime.strptime(game['gameTimeUTC'], '%Y-%m-%dT%H:%M:%SZ')
@@ -109,8 +149,7 @@ class DataManager:
             'gameClock': game.get('gameClock', ''),
             'period': game.get('period', ''),
             'gameTimeUTC': game['gameTimeUTC'],
-            'regulationPeriods': game.get('regulationPeriods', 4),
-            'skip_count' : 0
+            'regulationPeriods': game.get('regulationPeriods', 4)
         }
 
         # Team information
