@@ -499,7 +499,7 @@ class Render:
             # Update the display and counter
             canvas = matrix.SwapOnVSync(canvas)        
             time.sleep(6)  # Adjust as needed
-            #canvas.Clear()
+            canvas.Clear()
 
 
 
