@@ -1,7 +1,7 @@
 import json
 
 # File path of the JSON file
-file_path = './espn_event_data.json'
+file_path = './scripts/test.json'
 
 # Reading the JSON data
 with open(file_path, 'r') as file:

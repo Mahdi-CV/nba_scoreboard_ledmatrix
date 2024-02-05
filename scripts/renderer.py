@@ -358,7 +358,7 @@ class Render:
 
 
 
-    def render_win_probabilities(self, canvas, awayteam, hometeam, away_prob, home_prob):
+    def render_win_probabilities(self, canvas, away_prob, home_prob):
 
         gap = 6  # Gap between text elements
         # Calculate Y positions based on logo height, slightly below the names
@@ -366,14 +366,13 @@ class Render:
         home_score_y = away_score_y + self.logo_height # Y position for home team score
 
         # Calculate X positions for scores based on the length of team names
-        text_start_x = self.logo_width + (len(awayteam) * self.font_medium_width) + gap
-        home_text_y = self.logo_width + (len(hometeam) * self.font_medium_width) + gap
+        text_start_x = self.logo_width + (3 * self.font_medium_width) + gap
+        home_text_y = self.logo_width + (3 * self.font_medium_width) + gap
 
 
         # Format probabilities as percentages
         away_prob_text = f"{away_prob * 100:.0f}%"
-        home_prob_text = f"{home_prob * 100:.0f}%"
-
+        home_prob_text = f"{home_prob * 100:.0f}%"      
         # Draw probabilities
         graphics.DrawText(canvas, self.font_medium, text_start_x, away_score_y, graphics.Color(255, 255, 255), away_prob_text)
         graphics.DrawText(canvas, self.font_medium, text_start_x, home_score_y, graphics.Color(255, 255, 255), home_prob_text)
@@ -489,36 +488,36 @@ class Render:
             else:
                 # Game is live, ensure it's always shown by resetting its skip count
                 self.skip_counts[game_id] = 0
-
-                    
+            
             awayteam = game['team_information']['away']['teamTricode']
             hometeam = game['team_information']['home']['teamTricode']
             awayscore = game['team_information']['away']['score']
             homescore = game['team_information']['home']['score']
+            away_prob = game['team_information']['away']['awayWinProbability']
+            home_prob = game['team_information']['home']['homeWinProbability']
 
             self.render_team_logos(canvas, awayteam, hometeam)
+            self.render_team_names(canvas, awayteam, hometeam)
+            self.render_game_status(canvas, game_status, game)
 
             # Alternating between scores, probabilities, and quarterly scores
             if game_status == 2:  # Live games
                 #time.sleep(4)
-                self.render_team_names(canvas, awayteam, hometeam)
-                self.render_team_scores(canvas, awayteam, hometeam, awayscore, homescore)
-                #time.sleep(4)
-                    # Example probabilities, replace with real values
-                #away_prob, home_prob = 0.5, 0.5  # Fetch win probabilities here
-                #self.render_win_probabilities(canvas, awayteam, hometeam, away_prob, home_prob)
-                #self.render_quarterly_scores(canvas, game)
-                #time.sleep(4)
+                info_func_list = [
+                    (self.render_team_scores, (canvas, awayteam, hometeam, awayscore, homescore)),
+                    (self.render_win_probabilities, (canvas, away_prob, home_prob))
+                    ] 
+                for func, args in info_func_list:
+                    func(*args)  # Unpacking arguments from a tuple
+                    canvas = matrix.SwapOnVSync(canvas)        
+                    time.sleep(6)  # Adjust as needed
+                    canvas.Clear()
+               
             elif game_status == 1:  # Scheduled games
-                self.render_team_names(canvas, awayteam, hometeam)
-                self.render_spread(canvas, game)
+                                self.render_spread(canvas, game)
             else:  # Post game or other statuses
-                self.render_team_names(canvas, awayteam, hometeam)
                 self.render_team_scores(canvas, awayteam, hometeam, awayscore, homescore)
 
-            # Render the game clock and game status
-            #self.render_game_clock(canvas, game, clock_x, clock_y)
-            self.render_game_status(canvas, game_status, game)
 
             # Update the display and counter
             canvas = matrix.SwapOnVSync(canvas)        
@@ -527,6 +526,12 @@ class Render:
             print(f"Current Date: {current_game_day}, Skip Count Length: {len(self.skip_counts)}, Last Game Date: {self.last_game_day}")
 
 
+if __name__=='__main__':
+    renderer = Render()
+    while True:
+        data_manager = DataManager()
+        games_data = data_manager.fetch_data()  # Assuming this method returns the data as shown        
+        renderer.Render_Games(games_data)
 
 
 
@@ -571,14 +576,3 @@ class Render:
     #         canvas = matrix.SwapOnVSync(canvas)
     #         display_counter += 1
     #         time.sleep(4)  # Adjust as needed
-
-
-    
-if __name__=='__main__':
-    renderer = Render()
-    while True:
-        data_manager = DataManager()
-        games_data = data_manager.fetch_data()  # Assuming this method returns the data as shown        
-        renderer.Render_Games(games_data)
-
-

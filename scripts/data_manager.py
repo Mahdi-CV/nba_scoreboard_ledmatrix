@@ -125,6 +125,8 @@ class DataManager:
             }
 
             espn_event = espn_events_by_gamecode.get(game_code)
+            # print(espn_event)
+            # print("\n\n")
             if espn_event:
                 # Extract the gameTime from espn_data and convert it to a datetime object
                 game_time_espn = datetime.strptime(espn_event['date'], '%Y-%m-%dT%H:%MZ')
@@ -197,12 +199,13 @@ class DataManager:
             int(combined_game_data['team_information']['away']['score'])
         )
 
-        # Update probabilities if available
-        if ('situation' in espn_event and 
-            'lastPlay' in espn_event['situation'] and 
-            'probability' in espn_event['situation']['lastPlay']):
-            probabilities = espn_event['situation']['lastPlay']['probability']
-
+        game_data = espn_event["competitions"][0]
+        if 'situation' in game_data and 'lastPlay' in game_data['situation'] and 'probability' in game_data['situation']['lastPlay']:
+            probabilities = game_data['situation']['lastPlay']['probability']
+            # home_win_percentage = probabilities.get('homeWinPercentage', None)
+            # away_win_percentage = probabilities.get('awayWinPercentage', None)
+            # print(f"Home Win Percentage: {home_win_percentage}")
+            # print(f"Away Win Percentage: {away_win_percentage}")
             # Extract probabilities with defaults
             home_win_probability = int(round(probabilities.get('homeWinPercentage', 0), 2) * 100)
             away_win_probability = int(round(probabilities.get('awayWinPercentage', 0), 2) * 100)
@@ -249,7 +252,7 @@ if __name__ == '__main__':
     espn_data = data_manager.fetch_espn_data()
     nba_live_data = data_manager.fetch_nba_live_data()
     d = data_manager.combine_data(nba_live_data, espn_data)
-    print(d)
+    #print(d)
     #print('\n\n')
     # Process espn_data or perform further actions
 
