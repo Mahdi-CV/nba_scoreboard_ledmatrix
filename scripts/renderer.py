@@ -1,6 +1,6 @@
-from rgbmatrix import graphics, RGBMatrix, RGBMatrixOptions
+#from rgbmatrix import graphics, RGBMatrix, RGBMatrixOptions
 
-#from RGBMatrixEmulator import graphics, RGBMatrix, RGBMatrixOptions
+from RGBMatrixEmulator import graphics, RGBMatrix, RGBMatrixOptions
 
 from data_manager import DataManager
 import time 
@@ -199,6 +199,7 @@ class Render:
         self.options.drop_privileges = False
         self.last_game_day = None
         self.skip_counts = {}
+        self.skip_non_live_games_frequency = 20
         self.logo_height = 13
         self.logo_width =  17
         # Initialize and load fonts
@@ -452,10 +453,8 @@ class Render:
         canvas = matrix.CreateFrameCanvas()
         
         if games_data:
-            # Assuming all games in games_data are for the same day, use the first game to check the date
+            # Use the first game's date as reference for current processing day
             current_game_day = datetime.strptime(games_data[0]['game_information']['gameTimeUTC'], '%Y-%m-%dT%H:%M:%SZ').date()
-            print("current date: " + str(current_game_day))
-            print("skip_count length: " +str(len(self.skip_counts)))
             if self.last_game_day is None or current_game_day > self.last_game_day:
                 # It's a new game day, reset skip counts and update last_game_day
                 self.skip_counts.clear()
@@ -465,17 +464,18 @@ class Render:
             game_id = game['game_information']['gameId']
             game_status = game['game_information']['gameStatus']
 
-            # Check if the game is not live
+            # Increment or reset skip count based on game status
             if game_status != 2:
-                if self.skip_counts.get(game_id, 0) < 20:
-                    # Increment the skip count and continue to the next game
-                    self.skip_counts[game_id] = self.skip_counts.get(game_id, 0) + 1
+                # Game is not live
+                self.skip_counts[game_id] = self.skip_counts.get(game_id, 0) + 1
+                if self.skip_counts[game_id] <= self.skip_non_live_games_frequency:
+                    # Skip this game for now if skip count hasn't reached the threshold
                     continue
                 else:
-                    # Reset the skip count for this game as it's being shown again
+                    # Reset the skip count after showing the game
                     self.skip_counts[game_id] = 0
             else:
-                # Always reset the skip count for live games so they're always shown
+                # Game is live, ensure it's always shown by resetting its skip count
                 self.skip_counts[game_id] = 0
 
                     
@@ -512,6 +512,8 @@ class Render:
             canvas = matrix.SwapOnVSync(canvas)        
             time.sleep(6)  # Adjust as needed
             canvas.Clear()
+            print(f"Current Date: {current_game_day}, Skip Count Length: {len(self.skip_counts)}, Last Game Date: {self.last_game_day}")
+
 
 
 
@@ -561,11 +563,10 @@ class Render:
 
     
 if __name__=='__main__':
+    renderer = Render()
     while True:
         data_manager = DataManager()
-        games_data = data_manager.fetch_data()  # Assuming this method returns the data as shown
-
-        renderer = Render()
+        games_data = data_manager.fetch_data()  # Assuming this method returns the data as shown        
         renderer.Render_Games(games_data)
 
 
