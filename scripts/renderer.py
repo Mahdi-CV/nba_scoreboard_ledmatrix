@@ -1,6 +1,6 @@
-#from rgbmatrix import graphics, RGBMatrix, RGBMatrixOptions
+from rgbmatrix import graphics, RGBMatrix, RGBMatrixOptions
 
-from RGBMatrixEmulator import graphics, RGBMatrix, RGBMatrixOptions
+#from RGBMatrixEmulator import graphics, RGBMatrix, RGBMatrixOptions
 
 from data_manager import DataManager
 import time 
