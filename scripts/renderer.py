@@ -1,6 +1,6 @@
-#from rgbmatrix import graphics, RGBMatrix, RGBMatrixOptions
+from rgbmatrix import graphics, RGBMatrix, RGBMatrixOptions
 
-from RGBMatrixEmulator import graphics, RGBMatrix, RGBMatrixOptions
+#from RGBMatrixEmulator import graphics, RGBMatrix, RGBMatrixOptions
 
 from data_manager import DataManager
 import time 
@@ -499,7 +499,7 @@ class Render:
             # Update the display and counter
             canvas = matrix.SwapOnVSync(canvas)        
             time.sleep(6)  # Adjust as needed
-            canvas.Clear()
+            #canvas.Clear()
 
 
 
