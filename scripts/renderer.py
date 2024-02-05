@@ -1,6 +1,18 @@
-#from rgbmatrix import graphics, RGBMatrix, RGBMatrixOptions
+import sys
 
-from RGBMatrixEmulator import graphics, RGBMatrix, RGBMatrixOptions
+# Determine if the script is running in emulation mode based on command line arguments
+is_emulation = "emu" in sys.argv
+
+try:
+    if is_emulation:
+        # Attempt to import from the emulator package
+        from RGBMatrixEmulator import graphics, RGBMatrix, RGBMatrixOptions
+    else:
+        # Attempt to import from the actual hardware library
+        from rgbmatrix import graphics, RGBMatrix, RGBMatrixOptions
+except ImportError as e:
+    print(f"Error importing the RGBMatrix modules: {e}")
+    sys.exit(1)
 
 from data_manager import DataManager
 import time 
