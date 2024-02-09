@@ -355,27 +355,42 @@ class Render:
     #     graphics.DrawText(canvas, self.font_medium, away_score_x, away_name_y, graphics.Color(255, 255, 255), str(awayscore))
     #     graphics.DrawText(canvas, self.font_medium, home_score_x, home_name_y, graphics.Color(255, 255, 255), str(homescore))
 
-
-
-
     def render_win_probabilities(self, canvas, away_prob, home_prob):
-
-        gap = 6  # Gap between text elements
-        # Calculate Y positions based on logo height, slightly below the names
+        # Initialize away_prob_text and home_prob_text to ensure they have values
+        away_prob_text = ''
+        home_prob_text = ''
         away_score_y = self.font_medium_height + 2  # Y position for away team score
         home_score_y = away_score_y + self.logo_height # Y position for home team score
 
-        # Calculate X positions for scores based on the length of team names
-        text_start_x = self.logo_width + (3 * self.font_medium_width) + gap
-        home_text_y = self.logo_width + (3 * self.font_medium_width) + gap
+        gap = 6
+        # Example condition to check if probabilities are valid; adjust as needed
+        if away_prob > 0 and home_prob > 0:
+            away_prob_text = f"{away_prob:.0f}%"
+            home_prob_text = f"{home_prob:.0f}%"
+                    # Calculate X positions for scores based on the length of team names
+            text_start_x = self.logo_width + (3 * self.font_medium_width) + gap
+            home_text_y = self.logo_width + (3 * self.font_medium_width) + gap
+            # Additional logic to render the text on the canvas
+            # This is where you would use away_prob_text and home_prob_text for drawing
+            graphics.DrawText(canvas, self.font_medium, text_start_x, away_score_y, graphics.Color(255, 255, 255), away_prob_text)
+            graphics.DrawText(canvas, self.font_medium, text_start_x, home_score_y, graphics.Color(255, 255, 255), home_prob_text)
+
+    # def render_win_probabilities(self, canvas, away_prob, home_prob):
+
+    #     gap = 6  # Gap between text elements
+    #     # Calculate Y positions based on logo height, slightly below the names
 
 
-        # Format probabilities as percentages
-        away_prob_text = f"{away_prob * 100:.0f}%"
-        home_prob_text = f"{home_prob * 100:.0f}%"      
-        # Draw probabilities
-        graphics.DrawText(canvas, self.font_medium, text_start_x, away_score_y, graphics.Color(255, 255, 255), away_prob_text)
-        graphics.DrawText(canvas, self.font_medium, text_start_x, home_score_y, graphics.Color(255, 255, 255), home_prob_text)
+
+    #     if away_prob is None:
+    #         print("Warning: 'away_prob' is None. Setting to default value of 0.")
+    #         away_prob = 0  # or some other default value
+    #         # Format probabilities as percentages
+    #         away_prob_text = f"{away_prob :.0f}%"
+    #         home_prob_text = f"{home_prob :.0f}%"      
+    #     # Draw probabilities
+    #     graphics.DrawText(canvas, self.font_medium, text_start_x, away_score_y, graphics.Color(255, 255, 255), away_prob_text)
+    #     graphics.DrawText(canvas, self.font_medium, text_start_x, home_score_y, graphics.Color(255, 255, 255), home_prob_text)
 
 
     def render_quarterly_scores(self, canvas, game):
@@ -459,6 +474,11 @@ class Render:
             graphics.DrawText(canvas, self.font_small, clock_x, clock_y, graphics.Color(100, 120, 100), quarter_text)
             graphics.DrawText(canvas, self.font_small, clock_x + (len(quarter_text) * 5), clock_y, graphics.Color(255, 255, 255), game_clock_text)
   
+    def render_game_basics(self,canvas, awayteam, hometeam, game_status, game):
+        self.render_team_logos(canvas, awayteam, hometeam)
+        self.render_team_names(canvas, awayteam, hometeam)
+        self.render_game_status(canvas, game_status, game)
+    
     def Render_Games(self, games_data, printer=False):
         matrix = RGBMatrix(options=self.options)
         canvas = matrix.CreateFrameCanvas()
@@ -496,9 +516,6 @@ class Render:
             away_prob = game['team_information']['away']['awayWinProbability']
             home_prob = game['team_information']['home']['homeWinProbability']
 
-            self.render_team_logos(canvas, awayteam, hometeam)
-            self.render_team_names(canvas, awayteam, hometeam)
-            self.render_game_status(canvas, game_status, game)
 
             # Alternating between scores, probabilities, and quarterly scores
             if game_status == 2:  # Live games
@@ -506,16 +523,22 @@ class Render:
                 info_func_list = [
                     (self.render_team_scores, (canvas, awayteam, hometeam, awayscore, homescore)),
                     (self.render_win_probabilities, (canvas, away_prob, home_prob))
-                    ] 
+                ]
                 for func, args in info_func_list:
+                    if func == self.render_win_probabilities and (args[1] <= 0 or args[2] <= 0):
+                        print("Skipping render_win_probabilities due to non-positive probability values.")
+                        continue  # Skip this iteration of the loop
+                    self.render_game_basics(canvas, awayteam, hometeam, game_status, game)             
                     func(*args)  # Unpacking arguments from a tuple
-                    canvas = matrix.SwapOnVSync(canvas)        
+                    canvas = matrix.SwapOnVSync(canvas)
                     time.sleep(6)  # Adjust as needed
                     canvas.Clear()
                
             elif game_status == 1:  # Scheduled games
-                                self.render_spread(canvas, game)
+                self.render_game_basics(canvas, awayteam, hometeam, game_status, game)             
+                self.render_spread(canvas, game)
             else:  # Post game or other statuses
+                self.render_game_basics(canvas, awayteam, hometeam, game_status, game)             
                 self.render_team_scores(canvas, awayteam, hometeam, awayscore, homescore)
 
 
