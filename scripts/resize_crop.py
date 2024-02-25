@@ -1,9 +1,10 @@
+import sys
 from PIL import Image
 import os
 
 def resize_and_crop_images(source_folder, destination_folder, target_width, target_height, crop_ratio):
     """
-    Resize and crop images in a folder.
+    Crop and resize images in a folder.
 
     Parameters:
     - source_folder: Path to the source folder containing images.
@@ -21,27 +22,33 @@ def resize_and_crop_images(source_folder, destination_folder, target_width, targ
             img_path = os.path.join(source_folder, filename)
             img = Image.open(img_path)
 
-            # Resize image
-            img_resized = img.resize((target_width, target_height))
+            # Original dimensions
+            orig_width, orig_height = img.size
 
             # Calculate crop values
-            crop_height = int(crop_ratio / 100.0 * target_height)
-            crop_box = (0, crop_height, target_width, target_height - crop_height)
+            crop_height = int(crop_ratio / 100.0 * orig_height)
+            crop_box = (0, crop_height // 2, orig_width, orig_height - (crop_height // 2))
 
             # Crop image
-            img_cropped = img_resized.crop(crop_box)
+            img_cropped = img.crop(crop_box)
+
+            # Resize image
+            img_resized = img_cropped.resize((target_width, target_height))
 
             # Save the modified image to the destination folder
-            img_cropped.save(os.path.join(destination_folder, filename))
+            img_resized.save(os.path.join(destination_folder, filename))
 
-    print(f"Images have been resized and cropped to {destination_folder}")
+    print(f"Images have been cropped and resized to {destination_folder}")
 
 if __name__ == "__main__":
-    # Prompt user for inputs
-    source_folder = input("Enter the source folder path: ")
-    destination_folder = input("Enter the destination folder path: ")
-    target_width = int(input("Enter the target width (in pixels): "))
-    target_height = int(input("Enter the target height (in pixels): "))
-    crop_ratio = float(input("Enter the crop ratio (as a percentage): "))
+    if len(sys.argv) != 6:
+        print("Usage: python script.py source_folder destination_folder target_width target_height crop_ratio")
+        sys.exit(1)
+    
+    source_folder = sys.argv[1]
+    destination_folder = sys.argv[2]
+    target_width = int(sys.argv[3])
+    target_height = int(sys.argv[4])
+    crop_ratio = float(sys.argv[5])
 
     resize_and_crop_images(source_folder, destination_folder, target_width, target_height, crop_ratio)
