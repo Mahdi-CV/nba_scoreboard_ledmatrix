@@ -270,8 +270,8 @@ class Render:
         home_logo_y = away_logo_y + self.logo_height # Y position for home team logo
         home_text_y = home_logo_y + self.logo_height  # Y position for home team text
 
-        away_logo_path = f'./assets/logos_16x16/{awayteam}.png'
-        home_logo_path = f'./assets/logos_16x16/{hometeam}.png'
+        away_logo_path = f'./assets/logos_croped_13x17/{awayteam}.png'
+        home_logo_path = f'./assets/logos_croped_13x17/{hometeam}.png'
         if os.path.exists(away_logo_path) and os.path.exists(home_logo_path):
             away_logo = Image.open(away_logo_path).convert('RGB').resize((self.logo_width, self.logo_height))
             home_logo = Image.open(home_logo_path).convert('RGB').resize((self.logo_width, self.logo_height))
@@ -479,6 +479,14 @@ class Render:
         self.render_team_names(canvas, awayteam, hometeam)
         self.render_game_status(canvas, game_status, game)
     
+    def should_skip_game(self, game_id, game_status):
+        if game_status != 2:  # Game is not live
+            self.skip_counts[game_id] = self.skip_counts.get(game_id, 0) + 1
+            return self.skip_counts[game_id] > self.skip_non_live_games_frequency 
+        else:
+            self.skip_counts[game_id] = 0  # Reset count for live games
+            return False  # Live games should never be skipped
+
     def Render_Games(self, games_data, printer=False):
         matrix = RGBMatrix(options=self.options)
         canvas = matrix.CreateFrameCanvas()
@@ -496,18 +504,8 @@ class Render:
             game_status = game['game_information']['gameStatus']
 
             # Increment or reset skip count based on game status
-            if game_status != 2:
-                # Game is not live
-                self.skip_counts[game_id] = self.skip_counts.get(game_id, 0) + 1
-                if self.skip_counts[game_id] <= self.skip_non_live_games_frequency:
-                    # Skip this game for now if skip count hasn't reached the threshold
-                    continue
-                else:
-                    # Reset the skip count after showing the game
-                    self.skip_counts[game_id] = 0
-            else:
-                # Game is live, ensure it's always shown by resetting its skip count
-                self.skip_counts[game_id] = 0
+            if self.should_skip_game(game_id, game_status):
+                continue
             
             awayteam = game['team_information']['away']['teamTricode']
             hometeam = game['team_information']['home']['teamTricode']
@@ -515,7 +513,6 @@ class Render:
             homescore = game['team_information']['home']['score']
             away_prob = game['team_information']['away']['awayWinProbability']
             home_prob = game['team_information']['home']['homeWinProbability']
-
 
             # Alternating between scores, probabilities, and quarterly scores
             if game_status == 2:  # Live games
@@ -532,7 +529,7 @@ class Render:
                     func(*args)  # Unpacking arguments from a tuple
                     canvas = matrix.SwapOnVSync(canvas)
                     time.sleep(6)  # Adjust as needed
-                    canvas.Clear()
+                    #canvas.Clear()
                
             elif game_status == 1:  # Scheduled games
                 self.render_game_basics(canvas, awayteam, hometeam, game_status, game)             
@@ -541,11 +538,11 @@ class Render:
                 self.render_game_basics(canvas, awayteam, hometeam, game_status, game)             
                 self.render_team_scores(canvas, awayteam, hometeam, awayscore, homescore)
 
-
             # Update the display and counter
             canvas = matrix.SwapOnVSync(canvas)        
             time.sleep(6)  # Adjust as needed
             canvas.Clear()
+
             print(f"Current Date: {current_game_day}, Skip Count Length: {len(self.skip_counts)}, Last Game Date: {self.last_game_day}")
 
 
