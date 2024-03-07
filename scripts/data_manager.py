@@ -86,6 +86,8 @@ def normalize_team_abbreviation(team_code):
 class DataManager:
     def __init__(self):
         self.espn_url = "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard"
+        self.cache_file = Path("./game_data_cache.json")  
+
 
     def fetch_nba_live_data(self):
         board = scoreboard.ScoreBoard()
