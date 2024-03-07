@@ -551,77 +551,82 @@ class Render:
 
     #         print(f"Current Date: {current_game_day}, Skip Count Length: {len(self.skip_counts)}, Last Game Date: {self.last_game_day}")
 
+    def render_game_cycle(self, canvas, game, matrix):
+        """
+        Handles the rendering cycle for a single game, including drawing basic info,
+        team scores, and probabilities as applicable.
+        """
+        awayteam = game['team_information']['away']['teamTricode']
+        hometeam = game['team_information']['home']['teamTricode']
+        self.render_game_basics(canvas, awayteam, hometeam, game['game_information']['gameStatus'], game)
+
+        if game['game_information']['gameStatus'] == 2:  # Live games
+            self.handle_live_game(canvas, game, matrix)
+        elif game['game_information']['gameStatus'] == 1:  # Scheduled games
+            self.render_spread(canvas, game)
+            canvas = matrix.SwapOnVSync(canvas)
+            time.sleep(6)  # Adjust display time as needed
+        else:  # Post game or other statuses
+            self.render_team_scores(canvas, awayteam, hometeam, game['team_information']['away']['score'], game['team_information']['home']['score'])
+            canvas = matrix.SwapOnVSync(canvas)
+            time.sleep(6)  # Adjust display time as needed
+
+    def handle_live_game(self, canvas, game, matrix):
+        """
+        Special handling for live games, including displaying scores and win probabilities.
+        """
+        awayteam = game['team_information']['away']['teamTricode']
+        hometeam = game['team_information']['home']['teamTricode']
+        awayscore = game['team_information']['away']['score']
+        homescore = game['team_information']['home']['score']
+        away_prob = game['team_information']['away']['awayWinProbability'] or 0
+        home_prob = game['team_information']['home']['homeWinProbability'] or 0
+
+        self.render_team_scores(canvas, game['team_information']['away']['teamTricode'], game['team_information']['home']['teamTricode'], game['team_information']['away']['score'], game['team_information']['home']['score'])
+        canvas = matrix.SwapOnVSync(canvas)
+        time.sleep(6)  # Adjust display time as needed
+
+        if away_prob > 0 or home_prob > 0:
+            canvas.Clear()  # Clear canvas before drawing win probabilities
+            self.render_game_basics(canvas, awayteam, hometeam, game['game_information']['gameStatus'], game)  # Redraw basic game info
+            self.render_win_probabilities(canvas, away_prob, home_prob)
+            canvas = matrix.SwapOnVSync(canvas)
+            time.sleep(6)  # Adjust display time as needed
+
     def Render_Games(self, games_data):
+        """
+        Orchestrates the rendering process for each game in the dataset.
+        """
         matrix = RGBMatrix(options=self.options)
         
+        # Validate and process each game
         for game in games_data:
-            game_id = game['game_information']['gameId']
-            game_status = game['game_information']['gameStatus']
+            if not self.should_skip_game(game['game_information']['gameId'], game['game_information']['gameStatus']):
+                canvas = matrix.CreateFrameCanvas()
+                canvas.Clear()  # Ensure a clear canvas for each game
+                self.render_game_cycle(canvas, game, matrix)
+                matrix.SwapOnVSync(canvas)
+                canvas.Clear()  # Prepare canvas for the next game
 
-            # Skip logic based on game status and internal skip counters
-            if self.should_skip_game(game_id, game_status):
-                continue
+        # Handle game day logic post-processing
+        self.update_game_day_logic(games_data)
 
-            # Ensure we start with a fresh canvas for each game
-            canvas = matrix.CreateFrameCanvas()
-            canvas.Clear()  # Clear the canvas before drawing new content
-
-            # Common game information that needs to be rendered regardless of status
-            awayteam = game['team_information']['away']['teamTricode']
-            hometeam = game['team_information']['home']['teamTricode']
-            self.render_game_basics(canvas, awayteam, hometeam, game_status, game)
-
-            if game_status == 2:  # Live games
-                awayscore = game['team_information']['away']['score']
-                homescore = game['team_information']['home']['score']
-                away_prob = game['team_information']['away']['awayWinProbability']
-                home_prob = game['team_information']['home']['homeWinProbability']
-                
-                # Ensure probabilities are not None
-                away_prob = 0 if away_prob is None else away_prob
-                home_prob = 0 if home_prob is None else home_prob
-
-                # Render scores and win probabilities
-                self.render_team_scores(canvas, awayteam, hometeam, awayscore, homescore)
-                canvas = matrix.SwapOnVSync(canvas)
-                time.sleep(6)  # Adjust display time as needed
-                
-                if away_prob > 0 or home_prob > 0:
-                    canvas.Clear()  # Clear canvas before drawing win probabilities
-                    self.render_game_basics(canvas, awayteam, hometeam, game_status, game)  # Redraw basic info as clearing canvas also clears this
-                    self.render_win_probabilities(canvas, away_prob, home_prob)
-                    canvas = matrix.SwapOnVSync(canvas)
-                    time.sleep(6)
-
-            elif game_status == 1:  # Scheduled games
-                self.render_spread(canvas, game)
-                canvas = matrix.SwapOnVSync(canvas)
-                time.sleep(6)
-
-            else:  # Post game or other statuses
-                awayscore = game['team_information']['away']['score']
-                homescore = game['team_information']['home']['score']
-                self.render_team_scores(canvas, awayteam, hometeam, awayscore, homescore)
-                canvas = matrix.SwapOnVSync(canvas)
-                time.sleep(6)
-
-            # Clear canvas at the end of the current game's rendering cycle
-            canvas.Clear()
-
-        # After processing all games, check and update game day logic if needed
+    def update_game_day_logic(self, games_data):
+        """
+        Updates internal state based on the day of the games being processed.
+        """
         if games_data:
             current_game_day = datetime.strptime(games_data[0]['game_information']['gameTimeUTC'], '%Y-%m-%dT%H:%M:%SZ').date()
             if self.last_game_day is None or current_game_day > self.last_game_day:
                 self.skip_counts.clear()
                 self.last_game_day = current_game_day
-
+                 
 if __name__=='__main__':
     renderer = Render()
     while True:
         data_manager = DataManager()
         games_data = data_manager.fetch_data()  # Assuming this method returns the data as shown        
         renderer.Render_Games(games_data)
-
 
 
     # def Render_Games(self, games_data, printer=False):
