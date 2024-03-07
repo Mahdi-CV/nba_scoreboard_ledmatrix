@@ -240,12 +240,41 @@ class DataManager:
         return combined_game_data
 
     
+    # def fetch_data(self):
+    #     espn_data = self.fetch_espn_data()
+    #     nba_live_data = self.fetch_nba_live_data()
+    #     return self.combine_data(nba_live_data, espn_data)
+    
+    # Add methods to save data to and load data from cache
+    def save_data_to_cache(self, data):
+        try:
+            with self.cache_file.open('w') as f:
+                json.dump(data, f)
+        except Exception as e:
+            print(f"Failed to save data to cache: {e}")
+
+    def load_data_from_cache(self):
+        try:
+            if self.cache_file.exists():
+                with self.cache_file.open() as f:
+                    return json.load(f)
+            else:
+                return None
+        except Exception as e:
+            print(f"Failed to load data from cache: {e}")
+            return None
+
+    # Modify fetch_data to use cache
     def fetch_data(self):
         espn_data = self.fetch_espn_data()
         nba_live_data = self.fetch_nba_live_data()
-        return self.combine_data(nba_live_data, espn_data)
-
-
+        if espn_data and nba_live_data:
+            combined_data = self.combine_data(nba_live_data, espn_data)
+            self.save_data_to_cache(combined_data)  # Save the combined data to cache
+            return combined_data
+        else:
+            print("Failed to fetch new data, loading from cache.")
+            return self.load_data_from_cache()
        
 if __name__ == '__main__':
     data_manager = DataManager()

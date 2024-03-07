@@ -522,9 +522,15 @@ class Render:
                     (self.render_win_probabilities, (canvas, away_prob, home_prob))
                 ]
                 for func, args in info_func_list:
-                    if func == self.render_win_probabilities and (args[1] <= 0 or args[2] <= 0):
+                    # Before comparing, ensure that away_prob and home_prob are not None
+                    away_prob = 0 if away_prob is None else away_prob
+                    home_prob = 0 if home_prob is None else home_prob
+
+                    # Now perform the comparison safely
+                    if func == self.render_win_probabilities and (away_prob <= 0 or home_prob <= 0):
                         print("Skipping render_win_probabilities due to non-positive probability values.")
                         continue  # Skip this iteration of the loop
+
                     self.render_game_basics(canvas, awayteam, hometeam, game_status, game)             
                     func(*args)  # Unpacking arguments from a tuple
                     canvas = matrix.SwapOnVSync(canvas)
