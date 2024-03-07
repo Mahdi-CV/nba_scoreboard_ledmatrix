@@ -4,6 +4,7 @@ from datetime import datetime
 from dateutil import parser, tz
 import json
 import pytz
+from pathlib import Path
 
 def american_to_decimal(american_odds):
     if american_odds > 0:
