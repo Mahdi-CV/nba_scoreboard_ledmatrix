@@ -91,18 +91,24 @@ class DataManager:
 
 
     def fetch_nba_live_data(self):
-        board = scoreboard.ScoreBoard()
-        games_data = board.games.get_dict()
-        return games_data
+        try:
+            board = scoreboard.ScoreBoard()
+            return board.games.get_dict()
+        except Exception as e:
+            print(f"Failed to fetch NBA live data: {e}")
+            return None
     
     def fetch_espn_data(self):
-        response = requests.get(self.espn_url)
-        if response.status_code == 200:
-            data = response.json()
-        else:
-            print(f"Failed to fetch data: {response.status_code}")
-            data = None  # Assign None to data if request fails
-        return data
+        try:
+            response = requests.get(self.espn_url, timeout=10)  # Added a timeout for the request
+            if response.status_code == 200:
+                return response.json()
+            else:
+                print(f"Failed to fetch ESPN data: {response.status_code}")
+                return None
+        except requests.exceptions.RequestException as e:
+            print(f"Request to ESPN failed: {e}")
+            return None
     
     def combine_data(self, nba_live_data, espn_data):
         combined_data = []
